@@ -1,0 +1,17 @@
+<%= form_for(@measurement_rel) do |f| %>
+  <% if @measurement_rel.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@measurement_rel.errors.count, "error") %> prohibited this measurement_rel from being saved:</h2>
+
+      <ul>
+      <% @measurement_rel.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

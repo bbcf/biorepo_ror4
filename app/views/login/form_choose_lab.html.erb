@@ -1,0 +1,12 @@
+<%= form_tag( choose_lab_pages_path, {:id => 'form_choose_lab'} ) do %>
+
+Choose your lab:
+<% l = @labs.map{|lab| [lab.name, lab.id]} %>
+
+<%= select_tag 'lab_id', options_for_select(l) %>
+
+  <div class="actions">
+    <%= submit_tag %>
+  </div>
+
+<% end %>

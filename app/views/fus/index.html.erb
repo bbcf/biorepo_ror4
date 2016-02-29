@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Fus</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @fus.each do |fu| %>
+      <tr>
+        <td><%= link_to 'Show', fu %></td>
+        <td><%= link_to 'Edit', edit_fu_path(fu) %></td>
+        <td><%= link_to 'Destroy', fu, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Fu', new_fu_path %>

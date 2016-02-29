@@ -1,0 +1,19 @@
+<%= @projects.size %> projects found.
+
+<div id='list_projects'>
+<table>
+<thead><tr>
+<th>Name</th>
+</tr></thead>
+<tbody>
+<% @projects.each do |p| %>
+<tr>
+<td><%= p.name %></td>
+</tr>
+<% end %>
+</tbody>
+</table>
+</div>
+
+<div id='list_measurements_samples'>
+</div>

@@ -1,0 +1,55 @@
+<h1>My Samples</h1>
+
+<%= link_to 'New Sample', new_sample_path, :class=> 'add_link' %>
+
+<table id='list_samples' class='std_table'>
+  <thead>
+  <tr>
+    <th>Sample ID</th>
+    <th>User</th>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Protocole</th>
+    <th>Date</th>
+    <th></th>
+  </tr>
+</thead><tbody>
+<% @samples.each do |sample| %>
+<% user = @h_projects[sample.project_id].user %>
+  <tr>
+     <td><%= sample.id %></td>
+     <td><%= user.firstname %> <%= user.name %></td>
+	<td><%= sample.name %></td>
+<td><%= sample.exp_type %></td>
+<td><%= sample.protocole %></td>
+<td><%= display_date(sample.created_at) %></td>
+<!--    <td><%= link_to 'Show', sample %></td>-->
+    <td><%= link_to '', edit_sample_path(sample), :class=>'edit_link' %>
+<%= link_to '', sample, method: :delete, data: { confirm: 'Are you sure?' }, :class=>'trash_link' %></td>
+  </tr>
+<% end %>
+</tbody>
+</table>
+
+<br />
+
+<script type="text/javascript">
+    //<![CDATA[
+
+jQuery(document).ready(function() {
+    /* Build the DataTable with third column using our custom sort functions */
+    var oTable = jQuery('#list_samples').dataTable( {
+        "sDom": 'Wfrt',
+"oLanguage": { "sSearch": "" },
+//"bStateSave": true,
+"aLengthMenu": [[50, 100, 250, -1], [50, 100, 250, "All"]],
+        "iDisplayLength": <%= @samples.size %>
+        })
+
+ $('.dataTables_filter input').attr("placeholder", "Search here...");
+
+});
+
+
+//]]>
+</script>

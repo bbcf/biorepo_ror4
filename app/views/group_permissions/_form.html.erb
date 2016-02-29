@@ -1,0 +1,17 @@
+<%= form_for(@group_permission) do |f| %>
+  <% if @group_permission.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@group_permission.errors.count, "error") %> prohibited this group_permission from being saved:</h2>
+
+      <ul>
+      <% @group_permission.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

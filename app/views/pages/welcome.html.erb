@@ -1,0 +1,31 @@
+<%= form_tag '', {:id => :testform} do -%>
+<div id='search_input_main'>
+<%= text_field_tag :free_text, '', {:size=>22} %>
+</div>
+<div id='div_search'><%= link_to 'Search', '#', :onclick => "upd('" + search_path  + "')", :id => 'search' %></div>
+
+<% end %>
+
+<div id='results'>
+</div>
+
+<script type="text/javascript">
+    //<![CDATA[
+
+function upd(url){
+  $.ajax({
+                url: url,
+                type: "post",
+                dataType: "html",
+                data: $("#testform").serialize(),
+                success: function(returnData){
+                   $('#results').html(returnData);
+                },
+                error: function(e){
+                  alert(e);
+                   }
+            });
+}
+
+//]]>
+</script>

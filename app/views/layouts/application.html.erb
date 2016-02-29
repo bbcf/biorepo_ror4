@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Biorepo</title>
+  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <%= stylesheet_link_tag    "bootstrap.min" %>
+  <%= stylesheet_link_tag    "style" %>
+  <%= stylesheet_link_tag    "admin" %>
+  <%= stylesheet_link_tag 'jquery-ui-1.8.17.custom.css' %>
+  <%= stylesheet_link_tag 'demo_page.css' %>
+  <%= stylesheet_link_tag 'demo_table.css' %>
+	
+  <%= javascript_include_tag "application" %>
+
+  <%= javascript_include_tag 'jquery-ui-1.8.17.custom.min.js' %>
+
+  <%= javascript_include_tag 'DataTables-1.8.2/media/js/jquery.dataTables.min.js' %>
+  <%= javascript_include_tag 'JQuery-DataTables-ColumnFilter/media/js/jquery.dataTables.columnFilter.js' %>
+
+  
+
+
+  <%= csrf_meta_tags %>
+
+
+</head>
+<body>
+<div id=header></div>
+<nav role="navigation" class="navbar">
+        <div class="container">
+        <div class="row">
+          <p class="text-center">
+            <%= image_tag 'headerbg.png', alt: "Responsive image", class: "img-responsive" %>
+          </p>
+        </div>
+        <div class="row">
+       
+          <span class="first"><a class="nav-justified active" href="/biorepo/">Home</a></span>
+<!--          <span><a class="nav-justified " href="/biorepo/search">Search</a></span>-->
+       
+          <span><a class="nav-justified " href="/biorepo/projects">My Projects</a></span>
+              <span class="navbar-right">
+           <span class="loginlogout" id="login">
+	<% if !session[:user_id] or !session[:lab_id] %>
+	           <a href="/biorepo/login">Login</a>
+	<% else %>
+              <%= @user.firstname %> <%= @user.name %> [<%= @lab.name %>] | <a href="/biorepo/logout">Logout</a>
+        <% end %>
+           </span>
+              </span>
+	           <span><a class="nav-justified " href="/biorepo/samples">My Samples</a></span>
+	           <span><a class="nav-justified " href="/biorepo/measurements">My Measurements</a></span>
+             <span><a class="nav-justified " href="/biorepo/trackhubs">My Trackhubs</a></span>
+<%= link_to 'Tree View', treeview_path, :class => 'nav-justified' %> 
+<% if admin? %>
+<%= link_to 'Labs', labs_path, :class => 'nav-justified' %>
+<% end %>	
+       
+        </div>
+      </div>
+    </nav>
+<div id="content" class="container">
+<%= yield %>
+<div class="clearingdiv"></div>
+<div id="footer">
+  <div class="foottext">
+    <p>
+<a href="https://github.com/bbcf/biorepo"><%= image_tag 'github-icon.png', :title => "BioRepo on GitHub", :border => 0 %></a>
+<a href="http://bbcf.epfl.ch/"><%= image_tag 'bbcf-icon.png', :title=>"BBCF" %></a>
+<a href="http://www.vital-it.ch/"><%= image_tag 'vitalit-icon.png', :title=>"Data storage on Vital-IT" %></a>
+<a href="http://www.epfl.ch/"><%= image_tag 'epfl.png', :title => "Ecole Polytechnique Federale de Lausanne" %></a></p>
+</div>
+  <div class="clearingdiv"></div>
+</div>
+</div>
+
+</body>
+
+</html>

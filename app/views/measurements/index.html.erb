@@ -1,0 +1,61 @@
+<h1>My Measurements</h1>
+
+<%= link_to 'New Measurement', new_measurement_path, :class=> 'add_link' %>
+
+<table id='list_measurements' class='std_table'>
+<thead>
+  <tr>
+    <th>User</th>
+    <th>Sample</th>
+    <th>Name</th>
+    <th>Attachment</th>
+    <th>Description</th>
+    <th>Visibility</th>
+    <th>Raw</th>
+    <th>Date</th>
+    <th></th>
+  </tr>
+</thead><tbody>
+<% @measurements.each do |measurement| %>
+  <tr>
+   <% user = measurement.user %>
+    <td><%= user.firstname %> <%= user.name %></td>
+    <td><%= (sample = measurement.samples.first) ? sample.id : 'NA' %></td>
+     <td><%= measurement.name %></td>
+     <td><%= (fu = measurement.fus.first) ? fu.filename.split('.').last : 'NA' %></td>
+     <td><%= measurement.description %></td>
+     <td><%= (measurement.public) ? 'public' : 'private' %></td>
+     <td><%= (measurement.raw) ? 'raw' : 'processed data' %></td>
+     <td><%= display_date(measurement.created_at) %></td>
+   <!-- <td><%= link_to 'Show', measurement %></td>-->
+    <td>
+    <%= link_to '', download_measurement_path(measurement), :class => 'dl_link' %>
+    <%= link_to '', edit_measurement_path(measurement), :class => 'edit_link' %>
+    <%= link_to '', measurement, method: :delete, data: { confirm: 'Are you sure?' }, :class => 'trash_link' %></td>
+  </tr>
+<% end %>
+</tbody>
+</table>
+
+<br />
+
+<script type="text/javascript">
+    //<![CDATA[
+
+jQuery(document).ready(function() {
+    /* Build the DataTable with third column using our custom sort functions */
+    var oTable = jQuery('#list_measurements').dataTable( {
+        "sDom": 'Wfrt',
+"oLanguage": { "sSearch": "" },
+//"bStateSave": true,
+"aLengthMenu": [[50, 100, 250, -1], [50, 100, 250, "All"]],
+        "iDisplayLength": <%= @measurements.size %>
+        })
+
+ $('.dataTables_filter input').attr("placeholder", "Search here...");
+
+});
+
+
+//]]>
+</script>

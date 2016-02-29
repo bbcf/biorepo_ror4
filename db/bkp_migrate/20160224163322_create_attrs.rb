@@ -1,0 +1,8 @@
+class CreateAttrs < ActiveRecord::Migration
+  def change
+    create_table :attrs do |t|
+
+      t.timestamps null: false
+    end
+  end
+end
