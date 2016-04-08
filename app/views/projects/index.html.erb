@@ -3,6 +3,7 @@
 <%# admin? %>
 <%# @user.to_json %>
 <%# @projects.map{|p| p.name}.to_json %>
+
  
 <%= link_to 'New Project', new_project_path, :class=>'add_link' %>
 
@@ -15,7 +16,7 @@
     <th>Samples</th>
     <th>Description</th>
     <th>Date</th>
-    <th></th>
+    <th>Actions</th>
    </tr>
 </thead>
 <tbody>
@@ -28,9 +29,10 @@
     <td><%= project.description %></td>
     <td><%= display_date(project.created_at) %></td>
     <td>
-<!--    <td><%= link_to 'Show', project %></td>-->
-    <%= link_to '', edit_project_path(project), :class=> 'edit_link' %>
-    <%= link_to '', project, method: :delete, data: { confirm: 'Are you sure?' }, :class=>'trash_link' %></td>
+
+<!--    <td><%#= link_to 'Show', project %></td>-->
+    <%= link_to 'Edit', edit_project_path(project), :class=> 'edit_link' %>
+    <%= link_to 'Destroy', project, method: :delete, data: { confirm: 'Are you sure?' }, :class=>'trash_link' %></td>
   </tr>
 <% end %>
 </tbody>
@@ -42,7 +44,7 @@
     //<![CDATA[
 
 jQuery(document).ready(function() {
-    /* Build the DataTable with third column using our custom sort functions */
+   
     var oTable = jQuery('#list_projects').dataTable( {
 
         "sDom": 'Wfrt',

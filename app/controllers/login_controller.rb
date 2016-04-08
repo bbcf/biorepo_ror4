@@ -57,8 +57,14 @@ logger.debug('PRINCIPAL=' + @h.to_s)
         }
         @user = User.create(user_param)
         @lab = Lab.find_by_name(@h['allunits'])
-        logger.debug('LAB:' + @lab.id.to_s)
         @user.labs << @lab
+        # in case of array of units
+        #@labs = @h['allunits']
+        #@labs.each do |l|
+        #    @lab = Lab.find_by_name(l)
+        #    logger.debug('LAB:' + @lab.id.to_s)
+        #    @user.labs << @lab
+        #end
       end
 
       session[:user_id] = @user.id

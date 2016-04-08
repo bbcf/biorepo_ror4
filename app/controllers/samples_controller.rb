@@ -12,8 +12,8 @@ class SamplesController < ApplicationController
         @samples = Sample.all
         Project.all.map{|p| @h_projects[p.id]=p}
       else
-        @samples = Sample.find(:all, :joins => "join projects on (projects.id = project_id)", :conditions => { :projects => {:user_id => @user.id}})
-        Project.find(:all,  :conditions => {:user_id => @user.id}).map{|p| @h_proejcts[p.id]=p}
+        @samples = Sample.joins(:project).where(:projects => {:user_id => @user.id})
+       # Project.where(:user_id => @user.id).map{|p| @h_projects[p.id]=p}
       end
     end
 

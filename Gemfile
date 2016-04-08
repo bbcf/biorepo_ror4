@@ -30,6 +30,9 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'jquery-validation-rails'
 
 gem 'rack-cors', :require => 'rack/cors'
+gem 'sunspot'
+gem 'sunspot_rails'
+gem 'sunspot_solr'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
@@ -50,5 +53,5 @@ group :development, :test do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
 end
-gem 'jquery-datatables-rails'
+gem 'jquery-datatables-rails', '3.3.0'
 gem 'ajax-datatables-rails'

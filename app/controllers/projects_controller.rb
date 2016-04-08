@@ -14,7 +14,8 @@ class ProjectsController < ApplicationController
       if admin?
         @projects = Project.all
       else
-        @projects = Project.find(:all, :conditions => {:user_id => @user.id})
+        #@projects = Project.find(:all, :conditions => {:user_id => @user.id})
+        @projects = Project.where(:user_id => @user.id)
       end
     end
     respond_to do |format|
@@ -40,11 +41,14 @@ class ProjectsController < ApplicationController
   # POST /projects
   # POST /projects.json
   def create
-    @project = Project.new(project_params)
-
+    logger.debug('PARAMS:'+ params.to_s)
+   # @project = Project.new(project_params)
+   # @project.user_id = @user.id
+    @project = Project.new(:user_id => session[:user_id], :name => params[:project_name], :description => params[:description])
+    
     respond_to do |format|
       if @project.save
-        format.html { redirect_to @project, notice: 'Project was successfully created.' }
+        format.html { redirect_to projects_path, notice: 'Project was successfully created.' }
         format.json { render :show, status: :created, location: @project }
       else
         format.html { render :new }
@@ -85,6 +89,7 @@ class ProjectsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def project_params
-      params[:project]
+        #params.require(:project).permit(:user_id, :description, :project_name)
+        params[:project]
     end
 end
