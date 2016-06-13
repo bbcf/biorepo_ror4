@@ -14,3 +14,14 @@
  *= require dataTables/jquery.dataTables
  *= require_self
  */
+
+.button {
+    background-color:blue;
+    color: white;
+    cursor:pointer;
+    padding:1em;
+    margin:1em;
+    display:table-cell
+}
+#popup {position:fixed; width:100%; background-color: #f5f1d8; z-index:1000000;  border-radius:7px; padding:1em; top:30%; right:0px}
+#popup_cross {float:right; background-color:#f5f1d8; color:#b52735; z-index:1000000;cursor:pointer}

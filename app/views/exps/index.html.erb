@@ -1,0 +1,31 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Exps</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Label</th>
+      <th>Experiment type</th>
+      <th>Actions</th>
+        </tr>
+  </thead>
+
+  <tbody>
+    <% @exps.each do |exp| %>
+      <tr>
+	<td><%= exp.name %></td>
+	<td><%= exp.exp_type.name %></td>
+        <td><%= link_to 'Show', exp %>
+        | <%= link_to 'Edit', edit_exp_path(exp) %>
+        | <%= link_to 'Destroy', exp, method: :delete, data: { confirm: 'Are you sure?' } %>
+        | <%= link_to 'Batch upload', batch_upload_form_exp_path(exp) %>
+</td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Exp', new_exp_path %>

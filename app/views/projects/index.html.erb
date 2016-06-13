@@ -28,11 +28,10 @@
     <td><%= project.samples.map{|s| s.name}.join("\n") %></td>
     <td><%= project.description %></td>
     <td><%= display_date(project.created_at) %></td>
-    <td>
 
-<!--    <td><%#= link_to 'Show', project %></td>-->
-    <%= link_to 'Edit', edit_project_path(project), :class=> 'edit_link' %>
-    <%= link_to 'Destroy', project, method: :delete, data: { confirm: 'Are you sure?' }, :class=>'trash_link' %></td>
+    <td><%= link_to 'Show', project_path(project.key) %>
+    <%= link_to 'Edit', edit_project_path(project.key), :class=> 'edit_link' %>
+    <%= link_to 'Destroy', project_path(project.key), method: :delete, data: { confirm: 'Are you sure?' }, :class=>'trash_link' %></td>
   </tr>
 <% end %>
 </tbody>

@@ -11,6 +11,50 @@
     </div>
   <% end %>
 
+<div class="field">
+    <table>
+    <tbody>
+    <tr>
+        <th><%= label_tag :project, 'Project' %></th>
+        <td><%= select_tag :project_name, '', :required => true %> </td>
+    </tr>
+    <tr>
+        <th><%= label_tag :sample, 'Name' %></th>
+        <td><%= text_area_tag :sample_name, '', :placeholder => 'You sample name...', :required => true %> </td>
+    </tr>
+    <tr>
+        <th><%= label_tag :type, 'Type' %></th>
+        <td><%= select_tag :type, '', :required => true %> </td>
+    </tr>
+    <tr>
+    <tr>
+        <th><%= label_tag :protocole, 'Protocole' %></th>
+        <td><%= text_area_tag :protocole, '', :placeholder => 'You protocole here...' %> </td>
+    </tr>
+    <tr>
+        <th><%= label_tag :organism, 'Organism' %></th>
+        <td><%= select_tag :organism, '', :required => true %> </td>
+    </tr>
+    <tr>
+        <th><%= label_tag :cell_type, 'Cell type' %></th>
+        <td><%= select_tag :cell_type, '', :required => true %> </td>
+    </tr>
+
+    <tr>
+        <th><%= label_tag :background, 'Bio Background' %></th>
+        <td><%= text_area_tag :background, '', :placeholder => 'Write here...'%> </td>
+    </tr>
+    <tr>
+        <th><%= label_tag :cell_name, 'Cell Name' %></th>
+        <td><%= text_area_tag :cell_name, '', :placeholder => 'Write here...' %> </td>
+    </tr>
+    <tr>
+        <th><%= label_tag :study_factor, 'Study Factor' %></th>
+        <td><%= text_area_tag :study_factor, '', :placeholder => 'Write here...' %> </td>
+    </tr>
+    </tbody>
+    </table>
+</div>
   <div class="actions">
     <%= f.submit %>
   </div>

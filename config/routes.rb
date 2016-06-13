@@ -1,5 +1,12 @@
 Rails.application.routes.draw do
 
+  resources :exp_types
+  resources :exps do
+    collection do
+      get :batch_upload_form
+      post :batch_upload
+    end
+  end
   resources :attr_values
 
   resources :attrs
@@ -24,7 +31,7 @@ Rails.application.routes.draw do
 
   resources :measurement_rels
 
-  resources :projects
+  resources :projects, param: :key
 
   resources :fus
 

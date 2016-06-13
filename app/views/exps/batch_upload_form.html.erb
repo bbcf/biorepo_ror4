@@ -1,0 +1,27 @@
+<%= form_for @exp, url: batch_upload_exp_path(@exp) do |f| %> 
+
+<table>
+<tr><td>Dataset</td>
+<td><%= text_area_tag :import_txt %></td>
+</tr><tr>
+</tr><tr>
+<td>Fields</td>
+<td><ul id="sortable">
+<% @exp.attrs.each do |attr| %>
+ <li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span><%= attr.name %></li>
+<% end %>
+</ul>
+</td>
+</tr>
+</table>
+<%= hidden_field_tag 'exp_id', params[:exp_id] %>
+  <div class="actions">
+      <div id ='submit' class='button'>Submit</div>
+  </div>
+<% end %>
+
+
+<%= javascript_tag do %>
+
+
+<% end %>

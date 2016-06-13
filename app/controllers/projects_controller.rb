@@ -31,7 +31,7 @@ class ProjectsController < ApplicationController
 
   # GET /projects/new
   def new
-    @project = Project.new
+    @project = Project.new    
   end
 
   # GET /projects/1/edit
@@ -42,13 +42,16 @@ class ProjectsController < ApplicationController
   # POST /projects.json
   def create
     logger.debug('PARAMS:'+ params.to_s)
-   # @project = Project.new(project_params)
+    @project = Project.new(project_params)
    # @project.user_id = @user.id
-    @project = Project.new(:user_id => session[:user_id], :name => params[:project_name], :description => params[:description])
-    
+#    @project = Project.new(:user_id => session[:user_id], :name => params[:project_name], :description => params[:description])
+   
+    @project.key = create_key(Project, 6)
+    @project.user_id = @user.id
+
     respond_to do |format|
       if @project.save
-        format.html { redirect_to projects_path, notice: 'Project was successfully created.' }
+        format.html { redirect_to edit_project_path(@project.key), notice: 'Project was successfully created.' }
         format.json { render :show, status: :created, location: @project }
       else
         format.html { render :new }
@@ -62,7 +65,7 @@ class ProjectsController < ApplicationController
   def update
     respond_to do |format|
       if @project.update(project_params)
-        format.html { redirect_to @project, notice: 'Project was successfully updated.' }
+        format.html { redirect_to edit_project_path(@project.key), notice: 'Project was successfully updated.' }
         format.json { render :show, status: :ok, location: @project }
       else
         format.html { render :edit }
@@ -84,12 +87,12 @@ class ProjectsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_project
-      @project = Project.find(params[:id])
+      @project = Project.find_by_key(params[:key])
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def project_params
-        #params.require(:project).permit(:user_id, :description, :project_name)
-        params[:project]
+        params.require(:project).permit(:name, :description)
+        #params[:project]
     end
 end

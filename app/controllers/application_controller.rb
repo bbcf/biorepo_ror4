@@ -17,4 +17,15 @@ before_filter :get_user, :get_lab
   def admin?
     @user and @user.groups.select{|g| g.name == 'Admins'}.size > 0
   end
+
+   def create_key(model, num)
+     # create unique key for request                                                                                                                 
+     rnd = Array.new(num){[*'0'..'9', *'a'..'z'].sample}.join
+     while(model.find_by_key(rnd)) do
+       rnd = Array.new(num){[*'0'..'9', *'a'..'z'].sample}.join
+     end
+     return rnd
+   end
+   
+
 end

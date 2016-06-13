@@ -2,6 +2,7 @@ class Project < ActiveRecord::Base
 
   belongs_to :user
   has_and_belongs_to_many :labs
+   has_and_belongs_to_many :exps
   has_many :samples
 
   searchable do
@@ -16,7 +17,7 @@ class Project < ActiveRecord::Base
       samples.map {|sample| sample.protocole}
     end
     text :sample_attr_values do
-      samples.map {|sample| sample.attr_values.map{|av| av.value}}
+      samples.map {|sample| sample.attr_values.map{|av| av.name}}
     end
   end
 end
