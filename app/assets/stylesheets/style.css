@@ -362,7 +362,8 @@ body{
 
 #content {
     background-color: #ffffff;
-    max-width: 95%;
+/*    max-width: 95%; */
+    padding:15px;
     overflow: auto;
     -webkit-border-radius: 15px;
     -moz-border-radius: 15px;

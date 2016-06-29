@@ -1,20 +1,21 @@
-    <table>
-    <tbody>
-    <tr>
-        <th><%= label_tag :project_name, 'Project name' %></th>
-        <td><%= text_area_tag :project_name, '', :placeholder => 'You project name...', :required => true %> </td>
-    </tr>
-    <tr>
-        <%# this field is active only for lab_admins %>
-        <th><%= label_tag :user, 'User' %></th>
-        <% opts = [["genes bodies", 0], ["gene promoters", 1], ["exons", 2], ["custom upload", 3]]%>
-        <td><%= select_tag(:user_id, options_for_select(opts)) %></td>
-        <td><%#= select_tag ('user_id', options_for_select([["test", 1]])) %></td>
-    </tr>
-    <tr>
-        <th><%= label_tag :description %></th>
-        <td><%= text_area_tag :description, '', :placeholder => 'You comments here...' %> </td>
-    </tr>
-    
-    </tbody>
-    </table>
+<%= javascript_tag do%>
+
+ var grid;
+  var columns = [
+    {id: "title", name: "Title", field: "name"},
+    {id: "created_at", name: "Created_at", field: "created_at"},
+    {id: "protocole", name: "Protocole", field: "protocole"},
+    {id: "description", name: "Description", field: "description"}
+  ];
+
+  var datum = <%= raw @project.samples.to_json %>;
+  var options = {
+    enableCellNavigation: true,
+    enableColumnReorder: false
+  };
+$( document ).ready(function() {
+    grid = new Slick.Grid("#SampleGrid", datum, columns, options);
+});
+
+<% end %>
+

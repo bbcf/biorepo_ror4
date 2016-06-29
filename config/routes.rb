@@ -51,7 +51,11 @@ Rails.application.routes.draw do
 
   resources :labs
 
-  resources :samples
+  resources :samples do
+    collection do
+      get :index_slickgrid
+    end
+  end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

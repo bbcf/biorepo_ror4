@@ -18,24 +18,30 @@
 
 
 <div class="project">
+
+<%= @user.name %>
+
  <table>
 <tr><td>Name</td><td><%= f.text_field :name %></td></tr>
 <tr><td>Description</td><td><%= f.text_field :description %></td></tr>
 </table>
 
 </div>
-<div id="exps_list"></div>
+<div id="exp_list"></div>
+<%= render :partial => 'exp_space' %>
 <div id="new_exp_button" class="button">New experiment</div>
-<div id="samples_measurements"></div>
+<div id="sample_list"></div>
 
-    <div class="actions">
-
+<div class="actions">
     <%= f.submit %>
-    </div>
+</div>
 <% end %>
 
 
 <%= javascript_tag do %>
+
+var current_exp_id = <%= (exp = @project.exps.first) ? exp.id : null %> ;
+$('#exp_' + current_exp_id).toggleClass('activated');
 
 function update_exp_list(){
  $.ajax({
@@ -43,11 +49,24 @@ function update_exp_list(){
   type: "GET",
   dataType: 'html',
  }).done(function(html){
-    $('#exps_list').html(html);
+    $('#exp_list').html(html);
+    update_sample_list();
  }).fail(function(){
  });
 }
 
+function update_sample_list(){
+
+ $.ajax({
+  url: '<%= index_slickgrid_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&layout=0',
+  type: "GET",
+  dataType: 'html',
+ }).done(function(html){
+  // eval(responseText);
+   $('#sample_list').html(html);
+ }).fail(function(){
+ });
+}
 
 function call_exp_form(){
  $.ajax({
@@ -58,7 +77,6 @@ function call_exp_form(){
     $('#popup_content').html(html);
  }).fail(function(){
  });
-
 }
 
 $('#new_exp_button').click(function(){
@@ -66,9 +84,6 @@ call_exp_form();
 $('#popup').toggleClass('hidden');
 });
 
-
 update_exp_list()
-
-
 
 <% end %>

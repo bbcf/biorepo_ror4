@@ -12,8 +12,25 @@
  *
  *= require_tree .
  *= require dataTables/jquery.dataTables
+ *= require jquery-ui
  *= require_self
  */
+
+.hidden{
+display:none
+}
+
+.navbar-right{
+float:right
+}
+
+.clear{
+clear:both
+}
+
+.text-center{
+text-align:center
+}
 
 .button {
     background-color:blue;
@@ -25,3 +42,10 @@
 }
 #popup {position:fixed; width:100%; background-color: #f5f1d8; z-index:1000000;  border-radius:7px; padding:1em; top:30%; right:0px}
 #popup_cross {float:right; background-color:#f5f1d8; color:#b52735; z-index:1000000;cursor:pointer}
+
+.cell {
+background-color: #f5f1d8;
+}
+.cell.activated {
+background-color: #ccc;
+}
