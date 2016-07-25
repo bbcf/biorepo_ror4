@@ -5,21 +5,43 @@ class MeasurementsController < ApplicationController
 
   # GET /measurements
   # GET /measurements.json
-  def index
+  def index_slickgrid_m
     @measurements = Measurement.all
+    @h_projects = {}   
     if @user
-      if admin?
-        @measurements = Measurement.all
+#      if admin?
+#        @measurements = Measurement.all
+#      else
+#        @measurements = Measurement.find(:all, 
+#                                         :select => "sample_id, measurements.*", 
+#                                         :joins => "join measurements_samples on (measurements.id = measurement_id)", 
+#                                         :conditions => { :user_id => @user.id})
+#      end
+      if params[:project_key]
+        @project = Project.find_by_key(params[:project_key])
+        @h_projects[@project.id]=@project
+        @exp = Exp.find(params[:exp_id]) if params[:exp_id]
+        exps = @project.exps
+        exps = [@exp] if params[:exp_id] and exps.include?(@exp)
+        @samples = Sample.where(:exp_id => exps.map{|e| e.id}).all
+        h_condition = (params[:sample_id]) ? { :measurements_samples => {:sample_id =>params[:sample_id]}} :  {}
+        @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id)").where(h_condition).select("sample_id, measurements.*").all 
+                                         
       else
+        @projects = Project.where(:user_id => @user.id).all
+#        @project.map{|p| @h_projects[p.id]=p}
+        @samples = Sample.joins(:project).where(:projects => {:user_id => @user.id})
         @measurements = Measurement.find(:all, 
                                          :select => "sample_id, measurements.*", 
                                          :joins => "join measurements_samples on (measurements.id = measurement_id)", 
-                                         :conditions => { :user_id => @user.id})
+                                         :conditions => { :measurements_samples => {:sample_id => @samples.map{|s| s.id}}})
       end
     end
 
     respond_to do |format|
-      format.html # index.html.erb
+      format.html { # index.html.erb
+            render :layout => false if params[:layout].to_i == 0
+        }
       format.json { render json: @measurements }
     end
   end

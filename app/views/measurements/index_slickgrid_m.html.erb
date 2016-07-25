@@ -1,0 +1,164 @@
+<% if @measurements.size >0 %>
+<span class='info'><%= @measurements.size %> <%= (@measurements.size > 1 ) ? 'have' : 'has' %> been found!</span>
+<div id='MeasurementsGrid' style='height:500px'></div>
+<span id='save_measurements' class='button'>Save Measurements</span>
+    <%= javascript_tag do %>
+    function requiredFieldValidator(value) {
+        if (value == null || value == undefined || !value.length) {
+            return {valid: false, msg: "This is a required field"};
+        } else {
+            return {valid: true, msg: null};
+        }
+    }
+    var grid_m;
+    var columns_m = [
+   // {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
+        {id: "id", name: "Id", field: "id" },
+        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text},
+        {id: "created_at", name: "Created_at", field: "created_at"},
+        {id: "raw", name: "Raw", field: "raw", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
+        {id: "public", name: "Public", field: "public", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
+        //{id: "public", name: "Public", field: "public", editor: Slick.Editors.Checkbox},
+        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
+    ];
+
+
+    $(function () {
+
+        var options_m = {
+    enableAddRow: true,
+    asyncEditorLoading: false,
+    autoEdit: false,
+            enableCellNavigation: true,
+            enableColumnReorder: false,
+            explicitInitialization: true,
+            editable: true,
+            rowHeight: 22,
+            forceFitColumns: true
+        };
+
+    var data_m = <%= raw @measurements.to_json %>;
+            // Need to use a DataView for the filter plugin
+            var dataView_m = new Slick.Data.DataView();
+
+            grid_m = new Slick.Grid("#MeasurementsGrid", dataView_m, columns_m, options_m);
+
+            grid_m.setSelectionModel(new Slick.CellSelectionModel());
+
+            dataView_m.onRowCountChanged.subscribe(function (e, args) {
+                grid_m.updateRowCount();
+                grid_m.render();
+            });
+
+            dataView_m.onRowsChanged.subscribe(function (e, args) {
+                grid_m.invalidateRows(args.rows);
+                grid_m.render();
+            });
+
+            dataView_m.beginUpdate();
+            dataView_m.setItems(data_m);
+            dataView_m.setFilter(filter);
+            dataView_m.endUpdate();
+
+            var filterPlugin = new Ext.Plugins.HeaderFilter({});
+
+            // This event is fired when a filter is selected
+            filterPlugin.onFilterApplied.subscribe(function () {
+                dataView_m.refresh();
+                grid_m.resetActiveCell();
+
+                // Excel like status bar at the bottom
+                var status;
+
+                if (dataView_m.getLength() === dataView_m.getItems().length) {
+                    status = "";
+                } else {
+                    status = dataView_m.getLength() + ' OF ' + dataView_m.getItems().length + ' RECORDS FOUND';
+                }
+                $('#status-label').text(status);
+            });
+
+            // Event fired when a menu option is selected
+            filterPlugin.onCommand.subscribe(function (e, args) {
+                dataView_m.fastSort(args.column.field, args.command === "sort-asc");
+            });
+
+            grid_m.registerPlugin(filterPlugin);
+
+            var overlayPlugin = new Ext.Plugins.Overlays({});
+
+            // Event fires when a range is selected
+            overlayPlugin.onFillUpDown.subscribe(function (e, args) {
+                var column = grid_m.getColumns()[args.range.fromCell];
+
+                // Ensure the column is editable
+                if (!column.editor) {
+                    return;
+                }
+
+                // Find the initial value
+                var value = dataView_m.getItem(args.range.fromRow)[column.field];
+
+                dataView_m.beginUpdate();
+
+                // Copy the value down
+                for (var i = args.range.fromRow + 1; i <= args.range.toRow; i++) {
+                    dataView_m.getItem(i)[column.field] = value;
+                    grid_m.invalidateRow(i);
+                }
+
+                dataView_m.endUpdate();
+                grid_m.render();
+            });
+
+            grid_m.registerPlugin(overlayPlugin);
+
+            grid_m.init();
+
+            function filter(item) {
+                var columns = grid_m.getColumns();
+
+                var value = true;
+
+                for (var i = 0; i < columns.length; i++) {
+                    var col = columns[i];
+                    var filterValues = col.filterValues;
+
+                    if (filterValues && filterValues.length > 0) {
+                        value = value & _.contains(filterValues, item[col.field]);
+                    }
+                }
+                return value;
+            }
+        
+    function saveMeasurementTable(measurementData) {
+            alert('ajax');
+            var url = '<%= save_measurements_project_path({:key => @project.key }) %>'
+            jQuery.ajax({
+                    url: url,
+                    type: "POST",
+                    dataType: 'json',
+                    contentType: "application/json",
+                    processData: false,
+                    data: JSON.stringify(measurementData)
+                }).done(function(h) {
+                        alert('done');
+                       // window.location = h.redirect_url;
+                }).fail(function(error){
+                        alert('Something has gone wrong: ' + error);
+                      //  $('.loading-wrap').remove();
+                        console.error("POST ERROR");
+                        console.error(error);
+            });       
+
+ 
+        }
+        $('#save_measurements').click(function(event){
+            saveMeasurementTable(data_m);
+        });
+        });
+    <% end %>
+
+<% else %>
+No measurements found.
+<% end %>

@@ -31,13 +31,21 @@ Rails.application.routes.draw do
 
   resources :measurement_rels
 
-  resources :projects, param: :key
+  resources :projects, param: :key do 
+    member do
+      post :save_samples
+      post :save_measurements
+    end
+  end
 
   resources :fus
 
   resources :measurements do
     member do
       get :download
+    end
+    collection do
+      get :index_slickgrid_m
     end
   end
 
@@ -54,6 +62,7 @@ Rails.application.routes.draw do
   resources :samples do
     collection do
       get :index_slickgrid
+      get :test
     end
   end
 

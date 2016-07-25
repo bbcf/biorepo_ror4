@@ -3,6 +3,10 @@ class SamplesController < ApplicationController
 
   # GET /samples
   # GET /samples.json
+
+  def test
+  end
+
   def index
     @samples = Sample.all
     @h_projects = {}

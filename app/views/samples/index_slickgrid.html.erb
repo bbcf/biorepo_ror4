@@ -1,55 +1,64 @@
-<% if @samples.size >0 %>
-<span class='info'><%= @samples.size %> <%= (@samples.size > 1 ) ? 'have' : 'has' %> been found!</span>
-<div id='grid' style='height:500px'></div>
-    <%= javascript_tag do %>
-  function requiredFieldValidator(value) {
-    if (value == null || value == undefined || !value.length) {
-      return {valid: false, msg: "This is a required field"};
-    } else {
-      return {valid: true, msg: null};
-    }
-  }
- var grid;
-  var columns = [
-   // {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
-    {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text},
-    {id: "created_at", name: "Created_at", field: "created_at"},
-    {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text},
-    {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
-  ];
-
-
-$(function () {
-            var data_1 = [];
-            for (var i = 0; i < 500; i++) {
-                data_1[i] = {
-                    id: i,
-                    title: "Task " + i
-                };
-            }
+<div id='grid' style='height:300px'></div>
+<span id='save_samples' class='button'>Save Samples</span>
+<%= javascript_tag do %>
+//    function requiredFieldValidator(value) {
+//        if (value == null || value == undefined || !value.length) {
+//            return {valid: false, msg: "This is a required field"};
+//        } else {
+//            return {valid: true, msg: null};
+//        }
+//    }
+        var grid;
+        var columns = [
+        {id: "id", name: "Id", field: "id"},
+        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, width: 280},
+        {id: "created_at", name: "Created_at", field: "created_at", width: 180},
+        {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text, width: 280},
+        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text, width: 280}
+        ];
 
         var options = {
-    enableAddRow: true,
-    asyncEditorLoading: false,
-    autoEdit: false,
             enableCellNavigation: true,
             enableColumnReorder: false,
             explicitInitialization: true,
             editable: true,
-            rowHeight: 22
+            rowHeight: 22,
+            forceFitColumns: true
         };
+        
+    $(function () {
 
-    var data = <%= raw @samples.to_json %>;
-//    $( document ).ready(function() {
-//        grid = new Slick.Grid("#grid", data, columns, options);
-        //grid.autosizeColumns();
-//    });
-            // Need to use a DataView for the filter plugin
-            var dataView = new Slick.Data.DataView();
+       var data = <%= raw @samples.to_json %>;
+       // Need to use a DataView for the filter plugin
+       var dataView = new Slick.Data.DataView();
 
-            grid = new Slick.Grid("#grid", dataView, columns, options);
+       grid = new Slick.Grid("#grid", dataView, columns, options);
 
-            grid.setSelectionModel(new Slick.CellSelectionModel());
+       grid.setSelectionModel(new Slick.CellSelectionModel());
+
+       grid.onClick.subscribe(function (e, args) {
+       var cell = grid.getCellFromEvent(e);
+       var item = grid.getDataItem(args.row);
+        
+        var row = grid.getDataItem(args.row);
+        var field = grid.getColumns()[0].field
+        value = row[field]
+        current_sample_id = data[args.row][grid.getColumns()[0].field];
+        update_measurement_list();
+        // alert(data[args.row][grid.getColumns()[1].field]);
+       if (grid.getColumns()[cell.cell].id == "id") {
+           if (!grid.getEditorLock().commitCurrentEdit()) {
+               return;
+           } 
+        //   current_sample_id = data[args.row][grid.getColumns()[cell.cell].field];
+        //    update_measurement_list();
+        //   var states = { "Low": "Medium", "Medium": "High", "High": "Low" };
+        //   data[cell.row].priority = states[data[cell.row].priority];
+        //   grid.updateRow(cell.row);
+           e.stopPropagation();
+       }
+    });
+
 
             dataView.onRowCountChanged.subscribe(function (e, args) {
                 grid.updateRowCount();
@@ -96,9 +105,9 @@ $(function () {
             // Event fires when a range is selected
             overlayPlugin.onFillUpDown.subscribe(function (e, args) {
                 var column = grid.getColumns()[args.range.fromCell];
-
                 // Ensure the column is editable
                 if (!column.editor) {
+                    alert('no editable');
                     return;
                 }
 
@@ -121,6 +130,7 @@ $(function () {
 
             grid.init();
 
+            // Filter the data (using userscores _.contains)
             function filter(item) {
                 var columns = grid.getColumns();
 
@@ -136,9 +146,37 @@ $(function () {
                 }
                 return value;
             }
-        });
-    <% end %>
 
-<% else %>
-No samples found.
+        function cellClicked(e, args) {
+            alert('before');
+            var item = grid.getDataItem(args.row);
+            alert('after');
+        }
+
+
+        function saveSampleTable(sampleData) {
+            var url = '<%= save_samples_project_path({:key => @project.key }) %>'
+            jQuery.ajax({
+                    url: url,
+                    type: "POST",
+                    dataType: 'json',
+                    contentType: "application/json",
+                    processData: false,
+                    data: JSON.stringify(sampleData)
+                }).done(function(h) {
+                        alert(JSON.stringify(sampleData));
+                       // window.location = h.redirect_url;
+                }).fail(function(error){
+                        alert('Something has gone wrong: ' + error);
+                      //  $('.loading-wrap').remove();
+                        console.error("AJAX POST ERROR");
+                        console.error(error);
+            });       
+        }
+
+        $('#save_samples').click(function(event){
+            saveSampleTable(data);
+        });
+
+        });
 <% end %>

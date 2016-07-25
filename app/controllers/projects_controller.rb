@@ -36,12 +36,14 @@ class ProjectsController < ApplicationController
 
   # GET /projects/1/edit
   def edit
+    logger.debug('EDIT')
   end
 
   # POST /projects
   # POST /projects.json
   def create
     logger.debug('PARAMS:'+ params.to_s)
+    logger.debug('CREATE')
     @project = Project.new(project_params)
    # @project.user_id = @user.id
 #    @project = Project.new(:user_id => session[:user_id], :name => params[:project_name], :description => params[:description])
@@ -64,6 +66,8 @@ class ProjectsController < ApplicationController
   # PATCH/PUT /projects/1.json
   def update
     respond_to do |format|
+        logger.debug('PROJECT_PARAMS: ')
+        logger.debug( project_params.to_s)
       if @project.update(project_params)
         format.html { redirect_to edit_project_path(@project.key), notice: 'Project was successfully updated.' }
         format.json { render :show, status: :ok, location: @project }
@@ -84,6 +88,54 @@ class ProjectsController < ApplicationController
     end
   end
 
+  # POST
+  def save_samples
+    logger.debug('SAVE_SAMPLES: ' + params.to_s)
+    samples_data = params[:_json]
+    h_res={}
+    
+    samples_data.each do |row|
+           @sample = Sample.find(row[:id]) if row[:id]
+           # sample already exists
+           # if row[:id]
+           # VALIDATE PARAMETERS!!!!!!!!
+           if @sample
+                @sample.update_attributes(:name => row[:name], :protocole => row[:protocole], :description => row[:description])
+           # new sample
+           else
+                Sample.new(:name => row[:name], :project_id => @project.id, :exp_id => @exp.id, :protocole => row[:protocole], :description => row[:description])
+           end
+    end
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: h_res  }
+    end
+  end
+
+  # POST
+  def save_measurements
+    logger.debug('SAVE_MEASUREMENTS: ' + params.to_s)
+    measurements_data = params[:_json]
+    h_res={}
+    
+    measurements_data.each do |row|
+           @measurement = Measurement.find(row[:id]) if row[:id]
+           # measurement already exists
+           # if row[:id]
+           # VALIDATE PARAMETERS!!!!!!!!
+           if @measurement
+                @measurement.update_attributes(:name => row[:name], :raw => row[:raw], :public => row[:public], :description => row[:description])
+           # new sample
+           else
+                Sample.new(:name => row[:name], :sample_id => @sample.id, :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
+           end
+    end
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: h_res  }
+    end
+
+  end
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_project

@@ -31,6 +31,7 @@
 <%= render :partial => 'exp_space' %>
 <div id="new_exp_button" class="button">New experiment</div>
 <div id="sample_list"></div>
+<div id="measurement_list"></div>
 
 <div class="actions">
     <%= f.submit %>
@@ -39,9 +40,11 @@
 
 
 <%= javascript_tag do %>
-
+var project_id = <%= @project.id %>
 var current_exp_id = <%= (exp = @project.exps.first) ? exp.id : null %> ;
 $('#exp_' + current_exp_id).toggleClass('activated');
+
+var current_sample_id = null;<%#= (exp = @project.exps.samples.first) ? exp.id : null %> ;
 
 function update_exp_list(){
  $.ajax({
@@ -51,20 +54,37 @@ function update_exp_list(){
  }).done(function(html){
     $('#exp_list').html(html);
     update_sample_list();
+    // after change of Exp, no measurements are shown until click on Sample grid
+    current_sample_id = null;
  }).fail(function(){
  });
 }
 
 function update_sample_list(){
-
- $.ajax({
+$.ajax({
   url: '<%= index_slickgrid_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&layout=0',
   type: "GET",
   dataType: 'html',
  }).done(function(html){
   // eval(responseText);
    $('#sample_list').html(html);
+   update_measurement_list();
  }).fail(function(){
+    alert('failed to update s list');
+ });
+}
+
+function update_measurement_list(){
+ $.ajax({
+  url: '<%= index_slickgrid_m_measurements_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&sample_id=' + current_sample_id + '&layout=0',
+  type: "GET",
+  dataType: 'html',
+ }).done(function(html){
+  // eval(responseText);
+   $('#measurement_list').html(html);
+//    alert('current sample id = ' + current_sample_id);
+ }).fail(function(){
+    alert('failed update_m_list');
  });
 }
 
