@@ -2,4 +2,4 @@
 <%= render 'form' %>
 <%= link_to 'Edit', edit_project_path(@project.key), :class=> 'edit_link' %>
 <%= link_to 'Destroy', project_path(@project.key), method: :delete, data: { confirm: 'Are you sure?' }, :class=>'trash_link' %></td>
-<%= link_to 'Back', projects_path %>
+<%= link_to 'Back', projects_path(@project.key) %>

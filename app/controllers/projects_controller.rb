@@ -101,9 +101,51 @@ class ProjectsController < ApplicationController
            # VALIDATE PARAMETERS!!!!!!!!
            if @sample
                 @sample.update_attributes(:name => row[:name], :protocole => row[:protocole], :description => row[:description])
+                exp_type_id = Exp.find(row[:exp_id]).exp_type_id 
+                logger.debug('EXP: = ' + exp_type_id.to_s)
+                # get attributes for this experiment type
+                # can be done only once
+                h_condition = (exp_type_id) ? { :attrs_exp_types => {:exp_type_id => exp_type_id}, :owner => 'sample'} :  {:owner => 'sample'}
+                @attrs = Attr.joins("join attrs_exp_types on (attrs.id = attr_id)").where(h_condition).select("attrs.*").all                
+                @attrs.each do |a|
+                    if row[a.name]
+                    logger.debug('ATTR: ' + a.name.to_s)
+                    # select old atr_value for this sample
+                    h_avo_condition = {:attr_values_samples => {:sample_id => row[:id]}, :attr_id => a.id}
+                    @attr_value_old = AttrValue.joins("join attr_values_samples on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avo_condition).select("attrs.name as aname, attr_values.*").first # all
+                    logger.debug('sid = ' + row[:id].to_s + '; avid = ' + @attr_value_old.id.to_s + '; avname = ' + @attr_value_old.name.to_s) if @attr_value_old
+                    # if attr_value was deleted in SlickGrid
+                    if row[a.name].empty?
+                        logger.debug('DELETE old av and empty new av: ')
+                        @sample.attr_values.delete(@attr_value_old) if @attr_value_old
+                    # there is a new attr_value in SlickGrid
+                    else
+                        # select new attr_value from SlickGrid
+                        attr_value_name = row[a.name]
+                        h_avn_condition = { :attr_id => a.id, :name => row[a.name]}
+                        @attr_value_new = AttrValue.joins(" join attrs on (attrs.id = attr_values.attr_id)").where(h_avn_condition).select("attrs.name as aname, attr_values.*").first # all
+                        # if not existing attr_value - save in DB
+                        if !@attr_value_new # and !row[a.name].empty?
+                            logger.debug('ADD new av in DB')
+                            @attr_value_new = AttrValue.new(:name => row[a.name], :attr_id => a.id)
+                            @attr_value_new.save!
+                        end
+                        logger.debug('NEW avn: ' + @attr_value_new.name.to_s)
+                        # if attr_value was not changed in SlickGrid do nothing
+                        if @sample.attr_values.include?(@attr_value_new)
+                            logger.debug('NOT changed for  sid = ' + row[:id].to_s + '; aname = '+ @attr_value_new.aname + '; avid = ' + @attr_value_new.id.to_s + '; avname = ' + @attr_value_new.name.to_s)
+                        else
+                            # delete old attr_value in DB
+                            logger.debug('ADD and DELETE')
+                            @sample.attr_values.delete(@attr_value_old) if @attr_value_old
+                            @sample.attr_values << @attr_value_new
+                        end
+                    end
+                    end
+                end
            # new sample
            else
-                Sample.new(:name => row[:name], :project_id => @project.id, :exp_id => @exp.id, :protocole => row[:protocole], :description => row[:description])
+                Sample.new(:name => row[:name], :project_id => @project.id, :exp_id => row[:exp_id], :protocole => row[:protocole], :description => row[:description])
            end
     end
     respond_to do |format|

@@ -1,22 +1,29 @@
 <div id='grid' style='height:300px'></div>
 <span id='save_samples' class='button'>Save Samples</span>
 <%= javascript_tag do %>
-//    function requiredFieldValidator(value) {
-//        if (value == null || value == undefined || !value.length) {
-//            return {valid: false, msg: "This is a required field"};
-//        } else {
-//            return {valid: true, msg: null};
-//        }
-//    }
+    function requiredFieldValidator(value) {
+        if (value == null || value == undefined || !value.length) {
+            return {valid: false, msg: "This is a required field"};
+        } else {
+            return {valid: true, msg: null};
+        }
+    }
         var grid;
         var columns = [
         {id: "id", name: "Id", field: "id"},
-        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, width: 280},
-        {id: "created_at", name: "Created_at", field: "created_at", width: 180},
-        {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text, width: 280},
-        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text, width: 280}
+        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, width: 280, validator: requiredFieldValidator},
+        {id: "created_at", name: "Created_at", field: "created_at"},
+        {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text},
+        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text},
         ];
 
+        // add editors to columns of attributes
+        var l = columns.length;
+        columns = $.merge(columns, <%= raw @list_columns.to_json %>);
+        for (var i = 0; i < columns.length - l; ++i) {
+            var index = [columns.length - 1 - i];
+            columns[index]["editor"] = Slick.Editors.Text;
+        }
         var options = {
             enableCellNavigation: true,
             enableColumnReorder: false,
@@ -28,8 +35,9 @@
         
     $(function () {
 
-       var data = <%= raw @samples.to_json %>;
-       // Need to use a DataView for the filter plugin
+     //  var data = <%= raw @samples.to_json %>;
+       var data = <%= raw @SlickGridSampleData.to_json %>;
+        // Need to use a DataView for the filter plugin
        var dataView = new Slick.Data.DataView();
 
        grid = new Slick.Grid("#grid", dataView, columns, options);

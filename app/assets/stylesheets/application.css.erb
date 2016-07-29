@@ -1,0 +1,32 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the top of the
+ * compiled file, but it's generally better to create a new file per style scope.
+ *
+ *= require_self
+ *= require_tree .
+ */
+
+.std_table {border-collapse:collapse;border:0px;width:100%}
+.std_table tr th{border-bottom:2px solid black; cursor:pointer}
+.std_table tr td{background-color:white; border-bottom:1px solid black}
+
+#list_projects_filter {float:right;margin-top:-40px;width:300px}
+#list_measurements_filter {float:right;margin-top:-40px;width:300px}
+#list_samples_filter {float:right;margin-top:-40px;width:300px}
+
+a.add_link     { background-image: url("<%= asset_path 'add.png' %>")}
+a.edit_link    { background-image: url("<%= asset_path 'pencil.png' %>")}
+a.info_link    { background-image: url("<%= asset_path 'info_icon.png' %>")}
+a.dl_link      { padding-left: 16px; background: url("<%= asset_path 'dl.png' %>") no-repeat}
+a.ucsc_link    { background-image: url("<%= asset_path 'ucsc.png' %>")}
+a.gviz_link    { background-image: url("<%= asset_path 'gviz.png' %>")}
+a.delete_link  { background-image: url("<%= asset_path 'delete.png' %>")}
+a.trash_link   { padding-left: 16px; background: url("<%= asset_path 'trash.png' %>") no-repeat}
+a.public_link  { background-image: url("<%= asset_path 'public_dl.png' %>)}
+a.no_exit      { background-image: url("<%= asset_path 'no_exit.png' %>)}

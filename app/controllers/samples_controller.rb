@@ -54,6 +54,33 @@ class SamplesController < ApplicationController
           exps = @project.exps
           exps = [@exp] if params[:exp_id] and exps.include?(@exp)
           @samples = Sample.where(:exp_id => exps.map{|e| e.id}).all
+
+          @h_attr_values = {}
+          # [{:id , :name , :description, <attr_values> }, {}, {}]
+          @SlickGridSampleData = [] 
+          exp_type_id = @exp.exp_type_id if @exp
+          # get attributes for this experiment type
+          h_condition = (exp_type_id) ? { :attrs_exp_types => {:exp_type_id => exp_type_id}} :  {}
+          @attrs = Attr.joins("join attrs_exp_types on (attrs.id = attr_id)").where(h_condition).select("exp_type_id, attrs.*").all
+          # hash of attributes for samples 
+          h_columns = {}
+          @samples.each do |s|
+            # get attribute values for each sample of this experiment type
+            h_avcondition = {:attr_values_samples => {:sample_id => s.id}, :attr_id => @attrs.map{|a| a.id}}
+            @attr_values = AttrValue.joins("join attr_values_samples on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attrs.name as aname, sample_id as sid, attr_values.*").all
+            # ?????????????????????
+            @h_av = {}
+            @attr_values.each do |av|
+                # hash of key: attrs.name value: attr_values.name for SlickGrid data
+                @h_av[av.aname] = av.name
+                # make a hash - key: attr_id, value: hash of data for SlickGrid columns
+                h_columns[av.attr_id] = {:id => av.attr_id, :name => av.aname, :field => av.aname}
+            end
+            # merge samples.* with {attrs: attr_values} for SlickGrid data
+            @SlickGridSampleData.push( s.attributes.merge(@h_av))
+          end
+          # sort attributes by id and get list of them
+          @list_columns = h_columns.values.sort{|a, b| a[:id] <=> b[:id]}
         else
           @projects = Project.where(:user_id => @user.id).all
           @project.map{|p| @h_projects[p.id]=p}
