@@ -14,21 +14,31 @@
     var columns_m = [
     {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
         {id: "id", name: "Id", field: "id" },
-   //     {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text},
+        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text},
         {id: "created_at", name: "Created_at", field: "created_at"},
         {id: "raw", name: "Raw", field: "raw", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
         {id: "public", name: "Public", field: "public", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
-        //{id: "public", name: "Public", field: "public", editor: Slick.Editors.Checkbox},
         {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
     ];
 
-
-    $(function () {
+     // add editors to columns of attributes
+     var l = columns_m.length;
+     alert('l = ' + columns_m.length);
+//       alert(JSON.stringify(<%= @list_columns_m.to_json %>));
+//       alert(<%= @list_columns_m.to_json %>);
+     columns_m = $.merge(columns_m, <%= raw @list_columns_m.to_json %>);
+     alert('new length = ' + columns_m.length);
+    alert(JSON.stringify(columns_m));
+    for (var i = 0; i < columns_m.length - l; ++i) {
+        alert(i);
+         var index = [columns.length - 1 - i];
+        // columns_m[index]["editor"] = Slick.Editors.Text;
+     }
 
         var options_m = {
 //    enableAddRow: true,
-    asyncEditorLoading: false,
-    autoEdit: false,
+ //   asyncEditorLoading: false,
+ //   autoEdit: false,
             enableCellNavigation: true,
             enableColumnReorder: false,
             explicitInitialization: true,
@@ -36,8 +46,11 @@
             rowHeight: 22,
             forceFitColumns: true
         };
+    $(function () {
 
-    var data_m = <%= raw @measurements.to_json %>;
+
+          //  var data_m = <%= raw @measurements.to_json %>;
+            var data_m = <%= raw @SlickGridMeasurementData.to_json %>;
             // Need to use a DataView for the filter plugin
             var dataView_m = new Slick.Data.DataView();
 

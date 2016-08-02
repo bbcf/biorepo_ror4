@@ -52,7 +52,9 @@
         var field = grid.getColumns()[0].field
         value = row[field]
         current_sample_id = data[args.row][grid.getColumns()[0].field];
+
         update_measurement_list();
+
         // alert(data[args.row][grid.getColumns()[1].field]);
        if (grid.getColumns()[cell.cell].id == "id") {
            if (!grid.getEditorLock().commitCurrentEdit()) {

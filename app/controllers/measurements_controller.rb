@@ -7,29 +7,38 @@ class MeasurementsController < ApplicationController
   # GET /measurements.json
   def index_slickgrid_m
     @measurements = Measurement.all
-    @h_projects = {}   
     if @user
-#      if admin?
-#        @measurements = Measurement.all
-#      else
-#        @measurements = Measurement.find(:all, 
-#                                         :select => "sample_id, measurements.*", 
-#                                         :joins => "join measurements_samples on (measurements.id = measurement_id)", 
-#                                         :conditions => { :user_id => @user.id})
-#      end
       if params[:project_key]
         @project = Project.find_by_key(params[:project_key])
-        @h_projects[@project.id]=@project
         @exp = Exp.find(params[:exp_id]) if params[:exp_id]
+        exp_type_id = @exp.exp_type_id if @exp
+        
         exps = @project.exps
         exps = [@exp] if params[:exp_id] and exps.include?(@exp)
-        @samples = Sample.where(:exp_id => exps.map{|e| e.id}).all
+        
         h_condition = (params[:sample_id]) ? { :measurements_samples => {:sample_id =>params[:sample_id]}} :  {}
         @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id)").where(h_condition).select("sample_id, measurements.*").all 
-                                         
+ 
+        @SlickGridMeasurementData = [] 
+        # get attributes for this exp_type and owner = 'measurement'
+        h_condition = (exp_type_id) ? {:attrs_exp_types => {:exp_type_id => exp_type_id}, :owner => 'measurement'} : {:owner => 'measurement'}
+        @attrs = Attr.joins("join attrs_exp_types on (attrs.id = attr_id)").where(h_condition).select("exp_type_id, attrs.*").all 
+
+        h_columns = {}
+        @measurements.each do |m| 
+            # get attr_values for each measurement of this sample of this exp_type
+            h_avcondition = {:attr_values_measurements => {:measurement_id => m.id}, :attr_id => @attrs.map{|a| a.id}}
+            @attr_values = AttrValue.joins("join attr_values_measurements on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attrs.name as aname, measurement_id as mid, attr_values.*").all
+            h_av = {}
+            @attr_values.each do |av|
+                h_av[av.aname] = av.name
+                h_columns[av.attr_id] = {:id => av.attr_id, :name => av.aname, :field => av.aname}
+            end
+            @SlickGridMeasurementData.push(m.attributes.merge(h_av))
+        end                                 
+        @list_columns_m = h_columns.values.sort{|a, b| a[:id] <=> b[:id]}
       else
         @projects = Project.where(:user_id => @user.id).all
-#        @project.map{|p| @h_projects[p.id]=p}
         @samples = Sample.joins(:project).where(:projects => {:user_id => @user.id})
         @measurements = Measurement.find(:all, 
                                          :select => "sample_id, measurements.*", 

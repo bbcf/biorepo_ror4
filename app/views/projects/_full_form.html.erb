@@ -41,7 +41,8 @@
 
 <%= javascript_tag do %>
 var project_id = <%= @project.id %>
-var current_exp_id = <%= (exp = @project.exps.first) ? exp.id : null %> ;
+var current_exp_id = <%= (@project.exps.count > 0) ? @project.exps.first.id : 'null' %> ;
+
 $('#exp_' + current_exp_id).toggleClass('activated');
 
 var current_sample_id = null;<%#= (exp = @project.exps.samples.first) ? exp.id : null %> ;
@@ -53,7 +54,8 @@ function update_exp_list(){
   dataType: 'html',
  }).done(function(html){
     $('#exp_list').html(html);
-    update_sample_list();
+    if (current_exp_id) 
+        update_sample_list();
     // after change of Exp, no measurements are shown until click on Sample grid
     current_sample_id = null;
  }).fail(function(){
@@ -100,8 +102,8 @@ function call_exp_form(){
 }
 
 $('#new_exp_button').click(function(){
-call_exp_form();
-$('#popup').toggleClass('hidden');
+    call_exp_form();
+    $('#popup').toggleClass('hidden');
 });
 
 update_exp_list()

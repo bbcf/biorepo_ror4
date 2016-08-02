@@ -39,29 +39,28 @@ class SamplesController < ApplicationController
   end
   
   def index_slickgrid
-    @samples = Sample.all
-    @h_projects = {}
+ #   @samples = Sample.all
+ #   @h_projects = {}
 
     if @user
-#      if admin?
-#        @samples = Sample.all
-#        Project.all.map{|p| @h_projects[p.id]=p}
-#      else
         if params[:project_key]
           @project = Project.find_by_key(params[:project_key])
-          @h_projects[@project.id]=@project
+   #       @h_projects[@project.id]=@project
           @exp = Exp.find(params[:exp_id]) if params[:exp_id]
           exps = @project.exps
           exps = [@exp] if params[:exp_id] and exps.include?(@exp)
           @samples = Sample.where(:exp_id => exps.map{|e| e.id}).all
 
-          @h_attr_values = {}
+    #      @h_attr_values = {}
           # [{:id , :name , :description, <attr_values> }, {}, {}]
           @SlickGridSampleData = [] 
           exp_type_id = @exp.exp_type_id if @exp
           # get attributes for this experiment type
-          h_condition = (exp_type_id) ? { :attrs_exp_types => {:exp_type_id => exp_type_id}} :  {}
+          h_condition = (exp_type_id) ? { :attrs_exp_types => {:exp_type_id => exp_type_id}, :owner => 'sample'} :  {:owner => 'sample'}
           @attrs = Attr.joins("join attrs_exp_types on (attrs.id = attr_id)").where(h_condition).select("exp_type_id, attrs.*").all
+          @attrs.each do |a|
+            logger.debug('S ATTR: ' + a.name.to_s + ' ' + a.owner.to_s)
+          end
           # hash of attributes for samples 
           h_columns = {}
           @samples.each do |s|
@@ -82,8 +81,8 @@ class SamplesController < ApplicationController
           # sort attributes by id and get list of them
           @list_columns = h_columns.values.sort{|a, b| a[:id] <=> b[:id]}
         else
-          @projects = Project.where(:user_id => @user.id).all
-          @project.map{|p| @h_projects[p.id]=p}
+   #       @projects = Project.where(:user_id => @user.id).all
+   #       @project.map{|p| @h_projects[p.id]=p}
           @samples = Sample.joins(:project).where(:projects => {:user_id => @user.id})
         end
 #      end
