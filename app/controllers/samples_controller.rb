@@ -25,7 +25,7 @@ class SamplesController < ApplicationController
         @samples = Sample.where(:exp_id => exps.map{|e| e.id}).all
       else
         @projects = Project.where(:user_id => @user.id).all
-        @project.map{|p| @h_projects[p.id]=p}
+        @projects.map{|p| @h_projects[p.id]=p}
         @samples = Sample.joins(:project).where(:projects => {:user_id => @user.id})
       end
       #      end
@@ -39,19 +39,15 @@ class SamplesController < ApplicationController
   end
   
   def index_slickgrid
- #   @samples = Sample.all
- #   @h_projects = {}
 
     if @user
         if params[:project_key]
           @project = Project.find_by_key(params[:project_key])
-   #       @h_projects[@project.id]=@project
           @exp = Exp.find(params[:exp_id]) if params[:exp_id]
           exps = @project.exps
           exps = [@exp] if params[:exp_id] and exps.include?(@exp)
           @samples = Sample.where(:exp_id => exps.map{|e| e.id}).all
 
-    #      @h_attr_values = {}
           # [{:id , :name , :description, <attr_values> }, {}, {}]
           @SlickGridSampleData = [] 
           exp_type_id = @exp.exp_type_id if @exp
@@ -65,18 +61,24 @@ class SamplesController < ApplicationController
           h_columns = {}
           @samples.each do |s|
             # get attribute values for each sample of this experiment type
-            h_avcondition = {:attr_values_samples => {:sample_id => s.id}, :attr_id => @attrs.map{|a| a.id}}
-            @attr_values = AttrValue.joins("join attr_values_samples on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attrs.name as aname, sample_id as sid, attr_values.*").all
+#            h_avcondition = {:attr_values_samples => {:sample_id => s.id}, :attr_id => @attrs.map{|a| a.id}}
+#            @attr_values = AttrValue.joins("join attr_values_samples on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attrs.name as aname, sample_id as sid, attr_values.*").all
             # ?????????????????????
-            @h_av = {}
-            @attr_values.each do |av|
-                # hash of key: attrs.name value: attr_values.name for SlickGrid data
-                @h_av[av.aname] = av.name
-                # make a hash - key: attr_id, value: hash of data for SlickGrid columns
-                h_columns[av.attr_id] = {:id => av.attr_id, :name => av.aname, :field => av.aname}
+            h_av = {}
+            @attrs.each do |a|
+                h_avcondition = {:attr_values_samples => {:sample_id => s.id}, :attr_id => a.id}
+                av = AttrValue.joins("join attr_values_samples on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attr_values.*")
+               (av.count > 0) ? h_av[a.name] = av.first.name : h_av[a.name] = ''
+               h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name}
             end
+#            @attr_values.each do |av|
+#                # hash of key: attrs.name value: attr_values.name for SlickGrid data
+#                @h_av[av.aname] = av.name
+#                # make a hash - key: attr_id, value: hash of data for SlickGrid columns
+#                h_columns[av.attr_id] = {:id => av.attr_id, :name => av.aname, :field => av.aname}
+#            end
             # merge samples.* with {attrs: attr_values} for SlickGrid data
-            @SlickGridSampleData.push( s.attributes.merge(@h_av))
+            @SlickGridSampleData.push( s.attributes.merge(h_av))
           end
           # sort attributes by id and get list of them
           @list_columns = h_columns.values.sort{|a, b| a[:id] <=> b[:id]}

@@ -27,13 +27,20 @@ class MeasurementsController < ApplicationController
         h_columns = {}
         @measurements.each do |m| 
             # get attr_values for each measurement of this sample of this exp_type
-            h_avcondition = {:attr_values_measurements => {:measurement_id => m.id}, :attr_id => @attrs.map{|a| a.id}}
-            @attr_values = AttrValue.joins("join attr_values_measurements on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attrs.name as aname, measurement_id as mid, attr_values.*").all
+#            h_avcondition = {:attr_values_measurements => {:measurement_id => m.id}, :attr_id => @attrs.map{|a| a.id}}
+#            @attr_values = AttrValue.joins("join attr_values_measurements on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attrs.name as aname, measurement_id as mid, attr_values.*").all
             h_av = {}
-            @attr_values.each do |av|
-                h_av[av.aname] = av.name
-                h_columns[av.attr_id] = {:id => av.attr_id, :name => av.aname, :field => av.aname}
+            @attrs.each do |a|
+                h_avcondition = {:attr_values_measurements => {:measurement_id => m.id}, :attr_id => a.id}
+                av = AttrValue.joins("join attr_values_measurements on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attr_values.*")
+               (av.count > 0) ? (h_av[a.name] = av.first.name) : h_av[a.name] = ''
+               h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name}
+                
             end
+#            @attr_values.each do |av|
+#                h_av[av.aname] = av.name
+#                h_columns[av.attr_id] = {:id => av.attr_id, :name => av.aname, :field => av.aname}
+#            end
             @SlickGridMeasurementData.push(m.attributes.merge(h_av))
         end                                 
         @list_columns_m = h_columns.values.sort{|a, b| a[:id] <=> b[:id]}
