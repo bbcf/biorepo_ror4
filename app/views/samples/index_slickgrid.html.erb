@@ -14,8 +14,7 @@
         {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, width: 280, validator: requiredFieldValidator},
         {id: "created_at", name: "Created_at", field: "created_at"},
         {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text},
-//        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
-        {id: "description", name: "Description", field: "description", options: "Red,Green,Blue", editor: Slick.Editors.SelectCell}
+        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
         ];
 
         // add editors to columns of attributes
@@ -30,7 +29,6 @@
                     columns[index]["formatter"] = Slick.Formatters.Checkmark;
                     break;
                 case 5:
-                  //  columns[index]["options"] = "Red,Green,Blue";
                     columns[index]["editor"] = Slick.Editors.SelectCell;
                     break;
                 case 6:
@@ -39,12 +37,6 @@
                 default:
                     columns[index]["editor"] = Slick.Editors.Text;
             }
-//            if (columns[index]["widget"] == 3) {
-//                columns[index]["editor"] = Slick.Editors.Checkbox;
-//                columns[index]["formatter"] = Slick.Formatters.Checkmark;
-//            } else {
-//                columns[index]["editor"] = Slick.Editors.Text;
-//            }
         }
         var options = {
             enableCellNavigation: true,

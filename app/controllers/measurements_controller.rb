@@ -31,11 +31,19 @@ class MeasurementsController < ApplicationController
 #            @attr_values = AttrValue.joins("join attr_values_measurements on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attrs.name as aname, measurement_id as mid, attr_values.*").all
             h_av = {}
             @attrs.each do |a|
-                h_avcondition = {:attr_values_measurements => {:measurement_id => m.id}, :attr_id => a.id}
-                av = AttrValue.joins("join attr_values_measurements on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attr_values.*")
+               logger.debug("ATTR.name = " + a.name + ' ' + a.widget_id.to_s)
+               h_avcondition = {:attr_values_measurements => {:measurement_id => m.id}, :attr_id => a.id}
+               av = AttrValue.joins("join attr_values_measurements on (attr_values.id = attr_value_id)").where(h_avcondition).select("attr_values.*")
                (av.count > 0) ? (h_av[a.name] = av.first.name) : h_av[a.name] = ''
-               h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name}
-                
+               # collect attr_values as options for SlickGrid.SelectCelEditor
+               options = ""
+               if a.widget_id = 5
+                    av_options = AttrValue.where({:attr_id => a.id}).order(:name)
+                    av_options.each do |avo|
+                        options = options + "," + avo.name
+                    end
+               end
+               h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name, :widget => a.widget_id, :options => options}
             end
 #            @attr_values.each do |av|
 #                h_av[av.aname] = av.name

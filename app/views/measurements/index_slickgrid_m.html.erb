@@ -26,25 +26,24 @@
     columns_m = $.merge(columns_m, <%= raw @list_columns_m.to_json %>);
 //    alert(JSON.stringify(columns_m));
     for (var i = 0; i < columns_m.length - l; ++i) {
-         var index = [columns.length - 1 - i];
-         var widget = columns[index]["widget"];
+         var index = [columns_m.length - 1 - i];
+         var widget = columns_m[index]["widget"];
+//         alert(columns_m[index]["name"] +' ' + widget + ' ' + columns_m[index]["options"]);    
+         
          switch(widget) {
                 case 3:
-                    columns[index]["editor"] = Slick.Editors.Checkbox;
-                    columns[index]["formatter"] = Slick.Formatters.Checkmark;
+                    columns_m[index]["editor"] = Slick.Editors.Checkbox;
+                    columns_m[index]["formatter"] = Slick.Formatters.Checkmark;
+                    break;
+                case 5:
+                    columns_m[index]["editor"] = Slick.Editors.SelectCell;
                     break;
                 case 6:
-                    columns[index]["editor"] = Slick.Editors.Integer;
+                    columns_m[index]["editor"] = Slick.Editors.Integer;
                     break;
                 default:
-                    columns[index]["editor"] = Slick.Editors.Text;
+                    columns_m[index]["editor"] = Slick.Editors.Text;
             }
-//         if (columns[index]["widget"] == 3) {
-//             columns[index]["editor"] = Slick.Editors.Checkbox;
-//             columns[index]["formatter"] = Slick.Formatters.Checkmark;
-//         } else {
-//             columns[index]["editor"] = Slick.Editors.Text;
-//         }
      }
 
         var options_m = {
