@@ -58,6 +58,7 @@ function update_exp_list(){
         update_sample_list();
     // after change of Exp, no measurements are shown until click on Sample grid
     current_sample_id = null;
+    old_sample_id = null;
  }).fail(function(){
  });
 }
@@ -77,14 +78,15 @@ $.ajax({
 }
 
 function update_measurement_list(){
+ if (old_sample_id == current_sample_id) return;
  $.ajax({
   url: '<%= index_slickgrid_m_measurements_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&sample_id=' + current_sample_id + '&layout=0',
   type: "GET",
   dataType: 'html',
  }).done(function(html){
+  old_sample_id = current_sample_id;
   // eval(responseText);
    $('#measurement_list').html(html);
-//    alert('current sample id = ' + current_sample_id);
  }).fail(function(){
     alert('failed update_m_list');
  });

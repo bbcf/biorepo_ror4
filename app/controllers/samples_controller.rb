@@ -54,9 +54,6 @@ class SamplesController < ApplicationController
           # get attributes for this experiment type
           h_condition = (exp_type_id) ? { :attrs_exp_types => {:exp_type_id => exp_type_id}, :owner => 'sample'} :  {:owner => 'sample'}
           @attrs = Attr.joins("join attrs_exp_types on (attrs.id = attr_id)").where(h_condition).select("exp_type_id, attrs.*").all
-          @attrs.each do |a|
-            logger.debug('S ATTR: ' + a.name.to_s + ' ' + a.owner.to_s)
-          end
           # hash of attributes for samples 
           h_columns = {}
           @samples.each do |s|
@@ -69,7 +66,7 @@ class SamplesController < ApplicationController
                 h_avcondition = {:attr_values_samples => {:sample_id => s.id}, :attr_id => a.id}
                 av = AttrValue.joins("join attr_values_samples on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attr_values.*")
                (av.count > 0) ? h_av[a.name] = av.first.name : h_av[a.name] = ''
-               h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name}
+               h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name, :widget => a.widget_id}
             end
 #            @attr_values.each do |av|
 #                # hash of key: attrs.name value: attr_values.name for SlickGrid data

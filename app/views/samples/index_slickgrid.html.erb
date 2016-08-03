@@ -14,7 +14,7 @@
         {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, width: 280, validator: requiredFieldValidator},
         {id: "created_at", name: "Created_at", field: "created_at"},
         {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text},
-        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text},
+        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
         ];
 
         // add editors to columns of attributes
@@ -22,7 +22,24 @@
         columns = $.merge(columns, <%= raw @list_columns.to_json %>);
         for (var i = 0; i < columns.length - l; ++i) {
             var index = [columns.length - 1 - i];
-            columns[index]["editor"] = Slick.Editors.Text;
+            var widget = columns[index]["widget"];
+            switch(widget) {
+                case 3:
+                    columns[index]["editor"] = Slick.Editors.Checkbox;
+                    columns[index]["formatter"] = Slick.Formatters.Checkmark;
+                    break;
+                case 6:
+                    columns[index]["editor"] = Slick.Editors.Integer;
+                    break;
+                default:
+                    columns[index]["editor"] = Slick.Editors.Text;
+            }
+//            if (columns[index]["widget"] == 3) {
+//                columns[index]["editor"] = Slick.Editors.Checkbox;
+//                columns[index]["formatter"] = Slick.Formatters.Checkmark;
+//            } else {
+//                columns[index]["editor"] = Slick.Editors.Text;
+//            }
         }
         var options = {
             enableCellNavigation: true,
@@ -35,38 +52,39 @@
         
     $(function () {
 
-     //  var data = <%= raw @samples.to_json %>;
        var data = <%= raw @SlickGridSampleData.to_json %>;
-        // Need to use a DataView for the filter plugin
+       // Need to use a DataView for the filter plugin
        var dataView = new Slick.Data.DataView();
 
        grid = new Slick.Grid("#grid", dataView, columns, options);
 
        grid.setSelectionModel(new Slick.CellSelectionModel());
 
+       // update SlickGrid for measurements on sample change
        grid.onClick.subscribe(function (e, args) {
-       var cell = grid.getCellFromEvent(e);
-       var item = grid.getDataItem(args.row);
+            var cell = grid.getCellFromEvent(e);
+            var item = grid.getDataItem(args.row);
         
-        var row = grid.getDataItem(args.row);
-        var field = grid.getColumns()[0].field
-        value = row[field]
-        current_sample_id = data[args.row][grid.getColumns()[0].field];
+            var row = grid.getDataItem(args.row);
+            var field = grid.getColumns()[0].field
+            value = row[field]
+            current_sample_id = data[args.row][grid.getColumns()[0].field];
 
-        update_measurement_list();
+            update_measurement_list();
 
-        // alert(data[args.row][grid.getColumns()[1].field]);
-       if (grid.getColumns()[cell.cell].id == "id") {
-           if (!grid.getEditorLock().commitCurrentEdit()) {
-               return;
-           } 
-        //   current_sample_id = data[args.row][grid.getColumns()[cell.cell].field];
-        //    update_measurement_list();
-        //   var states = { "Low": "Medium", "Medium": "High", "High": "Low" };
-        //   data[cell.row].priority = states[data[cell.row].priority];
-        //   grid.updateRow(cell.row);
-           e.stopPropagation();
-       }
+            // alert(data[args.row][grid.getColumns()[1].field]);
+        //  if (grid.getColumns()[cell.cell].id == "id") {
+        //      if (!grid.getEditorLock().commitCurrentEdit()) {
+        //          return;
+        //      } 
+        //  current_sample_id = data[args.row][grid.getColumns()[cell.cell].field];
+        //  update_measurement_list();
+        //  var states = { "Low": "Medium", "Medium": "High", "High": "Low" };
+        //  data[cell.row].priority = states[data[cell.row].priority];
+        //  grid.updateRow(cell.row);
+            
+        //  e.stopPropagation();
+        //}
     });
 
 

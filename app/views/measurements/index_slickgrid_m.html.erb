@@ -21,18 +21,30 @@
         {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
     ];
 
-     // add editors to columns of attributes
-     var l = columns_m.length;
-     alert('l = ' + columns_m.length);
-//       alert(JSON.stringify(<%= @list_columns_m.to_json %>));
-//       alert(<%= @list_columns_m.to_json %>);
-     columns_m = $.merge(columns_m, <%= raw @list_columns_m.to_json %>);
-     alert('new length = ' + columns_m.length);
-    alert(JSON.stringify(columns_m));
+    // add editors to columns of attributes
+    var l = columns_m.length;
+    columns_m = $.merge(columns_m, <%= raw @list_columns_m.to_json %>);
+//    alert(JSON.stringify(columns_m));
     for (var i = 0; i < columns_m.length - l; ++i) {
-        alert(i);
          var index = [columns.length - 1 - i];
-        // columns_m[index]["editor"] = Slick.Editors.Text;
+         var widget = columns[index]["widget"];
+         switch(widget) {
+                case 3:
+                    columns[index]["editor"] = Slick.Editors.Checkbox;
+                    columns[index]["formatter"] = Slick.Formatters.Checkmark;
+                    break;
+                case 6:
+                    columns[index]["editor"] = Slick.Editors.Integer;
+                    break;
+                default:
+                    columns[index]["editor"] = Slick.Editors.Text;
+            }
+//         if (columns[index]["widget"] == 3) {
+//             columns[index]["editor"] = Slick.Editors.Checkbox;
+//             columns[index]["formatter"] = Slick.Formatters.Checkmark;
+//         } else {
+//             columns[index]["editor"] = Slick.Editors.Text;
+//         }
      }
 
         var options_m = {
