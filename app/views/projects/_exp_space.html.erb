@@ -8,7 +8,7 @@
 <tbody>
 <% @project.exps.each do |exp| %>
     <tr id = 'exp_<%=exp.id %>' class='cell'>
-        <td><%= exp.name %></td><td><%= exp.exp_type.name %></td>
+        <td><%= exp.id %></td><td><%= exp.name %></td><td><%= exp.exp_type.name %></td>
     </tr>
 <% end %>
 </tbody>

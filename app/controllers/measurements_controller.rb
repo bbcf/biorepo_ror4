@@ -37,7 +37,7 @@ class MeasurementsController < ApplicationController
                (av.count > 0) ? (h_av[a.name] = av.first.name) : h_av[a.name] = ''
                # collect attr_values as options for SlickGrid.SelectCelEditor
                options = ""
-               if a.widget_id = 5
+               if a.widget_id == 5
                     av_options = AttrValue.where({:attr_id => a.id}).order(:name)
                     av_options.each do |avo|
                         options = options + "," + avo.name
@@ -49,7 +49,7 @@ class MeasurementsController < ApplicationController
 #                h_av[av.aname] = av.name
 #                h_columns[av.attr_id] = {:id => av.attr_id, :name => av.aname, :field => av.aname}
 #            end
-            @SlickGridMeasurementData.push(m.attributes.merge(h_av))
+            @SlickGridMeasurementData.push(m.attributes.merge(h_av.merge({:exp_id => params[:exp_id]})))
         end                                 
         @list_columns_m = h_columns.values.sort{|a, b| a[:id] <=> b[:id]}
       else

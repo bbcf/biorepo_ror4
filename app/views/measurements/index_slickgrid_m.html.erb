@@ -12,9 +12,9 @@
     }
     var grid_m;
     var columns_m = [
-    {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
         {id: "id", name: "Id", field: "id" },
-        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text},
+  //      {id: "exp_type_id", name: "Exp_type_id", field: "exp_type_id" },
+        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
         {id: "created_at", name: "Created_at", field: "created_at"},
         {id: "raw", name: "Raw", field: "raw", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
         {id: "public", name: "Public", field: "public", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
@@ -31,7 +31,12 @@
 //         alert(columns_m[index]["name"] +' ' + widget + ' ' + columns_m[index]["options"]);    
          
          switch(widget) {
+                case 1:
+                case 2:
+                    columns_m[index]["editor"] = Slick.Editors.Text;
+                    break;
                 case 3:
+                case 4:
                     columns_m[index]["editor"] = Slick.Editors.Checkbox;
                     columns_m[index]["formatter"] = Slick.Formatters.Checkmark;
                     break;
@@ -39,6 +44,7 @@
                     columns_m[index]["editor"] = Slick.Editors.SelectCell;
                     break;
                 case 6:
+                case 7: // type year
                     columns_m[index]["editor"] = Slick.Editors.Integer;
                     break;
                 default:
@@ -156,7 +162,6 @@
             }
         
     function saveMeasurementTable(measurementData) {
-            alert('ajax');
             var url = '<%= save_measurements_project_path({:key => @project.key }) %>'
             jQuery.ajax({
                     url: url,
@@ -166,7 +171,6 @@
                     processData: false,
                     data: JSON.stringify(measurementData)
                 }).done(function(h) {
-                        alert('done');
                        // window.location = h.redirect_url;
                 }).fail(function(error){
                         alert('Something has gone wrong: ' + error);

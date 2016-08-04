@@ -68,7 +68,7 @@ class SamplesController < ApplicationController
                av = AttrValue.joins("join attr_values_samples on (attr_values.id = attr_value_id)").where(h_avcondition).select("attr_values.*")
                (av.count > 0) ? h_av[a.name] = av.first.name : h_av[a.name] = ''
                options = ""
-               if a.widget_id = 5
+               if a.widget_id == 5
                     av_options = AttrValue.where({:attr_id => a.id}).order(:name)
                     av_options.each do |avo|
                         options = options + "," + avo.name
