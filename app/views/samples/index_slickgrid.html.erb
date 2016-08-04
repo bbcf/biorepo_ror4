@@ -24,7 +24,12 @@
             var index = [columns.length - 1 - i];
             var widget = columns[index]["widget"];
             switch(widget) {
+                case 1:
+                case 2:
+                    columns[index]["editor"] = Slick.Editors.Text;
+                    break;
                 case 3:
+                case 4:
                     columns[index]["editor"] = Slick.Editors.Checkbox;
                     columns[index]["formatter"] = Slick.Formatters.Checkmark;
                     break;
@@ -32,6 +37,7 @@
                     columns[index]["editor"] = Slick.Editors.SelectCell;
                     break;
                 case 6:
+                case 7: // year
                     columns[index]["editor"] = Slick.Editors.Integer;
                     break;
                 default:
