@@ -3,6 +3,41 @@ class MeasurementsController < ApplicationController
   def download
   end
 
+  def index
+    @measurements = Measurement.all
+    @h_projects = {}
+    
+    if @user
+      #      if admin?
+      #        @samples = Sample.all
+      #        Project.all.map{|p| @h_projects[p.id]=p}
+      #      else
+      if params[:project_key]
+        @project = Project.find_by_key(params[:project_key])
+        @h_projects[@project.id]=@project
+        @exp = Exp.find(params[:exp_id]) if params[:exp_id]
+        exps = @project.exps
+        exps = [@exp] if params[:exp_id] and exps.include?(@exp)
+        samples = Sample.where(:exp_id => exps.map{|e| e.id}).first
+#    @measurements = Measurement.all
+        @measurements = samples.measurements
+      else
+        @projects = Project.where(:user_id => @user.id).all
+        @projects.map{|p| @h_projects[p.id]=p}
+        samples = Sample.joins(:project).where(:projects => {:user_id => @user.id}).first
+  #  @measurements = Measurement.all
+        @measurements = samples.measurements
+      end
+      #      end
+      
+      respond_to do |format|
+        format.html {
+          render :layout => false if params[:layout] == '0'
+        }
+      end
+    end
+  end
+  
   # GET /measurements
   # GET /measurements.json
   def index_slickgrid_m

@@ -10,6 +10,13 @@
             return {valid: true, msg: null};
         }
     }
+    function yearFieldValidator(value) {
+        if (value < 1900 || value > 2050) {
+            return {valid: false, msg: "This is a year field"};
+        } else {
+            return {valid: true, msg: null};
+        }
+    }
     var grid_m;
     var columns_m = [
         {id: "id", name: "Id", field: "id" },
@@ -44,8 +51,11 @@
                     columns_m[index]["editor"] = Slick.Editors.SelectCell;
                     break;
                 case 6:
+                    columns_m[index]["editor"] = Slick.Editors.Integer;
+                    break;
                 case 7: // type year
                     columns_m[index]["editor"] = Slick.Editors.Integer;
+                    columns_m[index]["validator"] = yearFieldValidator
                     break;
                 default:
                     columns_m[index]["editor"] = Slick.Editors.Text;

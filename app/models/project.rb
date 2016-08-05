@@ -2,7 +2,7 @@ class Project < ActiveRecord::Base
 
   belongs_to :user
   has_and_belongs_to_many :labs
-   has_and_belongs_to_many :exps
+  has_and_belongs_to_many :exps
   has_many :samples
 
   searchable do

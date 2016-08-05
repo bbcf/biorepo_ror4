@@ -246,9 +246,6 @@ class ProjectsController < ApplicationController
     def set_project
       @project = Project.find_by_key(params[:key])
       @exps = @project.exps
-      @exps.each do |e|
-        logger.debug('E: ' +e.id.to_s)
-      end
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.

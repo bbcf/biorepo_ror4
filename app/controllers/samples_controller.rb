@@ -32,7 +32,7 @@ class SamplesController < ApplicationController
       
       respond_to do |format|
         format.html {
-          render :layout => false if params[:layout].to_i == 0
+          render :layout => false if params[:layout] == '0'
         }
       end
     end
