@@ -31,8 +31,11 @@
 <%= render :partial => 'exp_space' %>
 <div id="new_exp_button" class="button">New experiment</div>
 <div id="sample_list"></div>
-<div id="measurement_list"></div>
+Add <%= number_field_tag 'number_new_batch_samples', 3,  required: true, min: 1, max: 100 %> new samples:
+<div id='batch_new_samples_button' class="button">Add samples</div>
 
+
+<div id="measurement_list"></div>
 <div class="actions">
     <%= f.submit %>
 </div>
@@ -54,10 +57,10 @@ function update_exp_list(){
   dataType: 'html',
  }).done(function(html){
     $('#exp_list').html(html);
-    if (current_exp_id) 
+    if (current_exp_id) { 
         update_sample_list();
-    // after change of Exp, no measurements are shown until click on Sample grid
-    current_sample_id = null;
+    }
+//    current_sample_id = null;
     old_sample_id = null;
  }).fail(function(){
  });
@@ -78,7 +81,6 @@ $.ajax({
 }
 
 function update_measurement_list(){
- if (old_sample_id == current_sample_id) return;
  $.ajax({
   url: '<%= index_slickgrid_m_measurements_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&sample_id=' + current_sample_id + '&layout=0',
   type: "GET",
@@ -103,9 +105,31 @@ function call_exp_form(){
  });
 }
 
+// add new experiment to the project
+
 $('#new_exp_button').click(function(){
     call_exp_form();
     $('#popup').toggleClass('hidden');
+});
+
+// add new empty samples by batch
+
+$('#batch_new_samples_button').click(function(){
+$.ajax({
+  url: '<%= batch_new_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id,
+  type: "POST",
+  data: {
+   project_key : '<%= @project.key %>',
+   exp_id : current_exp_id,
+   nber_new_samples : $('#number_new_batch_samples').val() 
+  },
+  dataType: 'json',
+ }).done(function(html){
+    alert('success');
+  update_sample_list();
+ }).fail(function(){
+    alert('failed creating new samples');
+ });
 });
 
 update_exp_list()

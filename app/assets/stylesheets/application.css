@@ -33,11 +33,16 @@ text-align:center
 }
 
 .button {
-    background-color:blue;
-    color: white;
-    cursor:pointer;
-    padding:1em;
-    margin:1em;
+background: LightSteelBlue none repeat scroll 0 0;
+    border: 1px solid #4b4e50;
+    border-radius: 5px;
+ //   box-shadow: 2px 2px 2px Grey;
+    cursor: pointer;
+    font-style: normal;
+    width: auto;
+
+    padding: 0.5em;
+    margin: 0.5em;
     display:table-cell
 }
 #popup {position:fixed; width:100%; background-color: #f5f1d8; z-index:1000000;  border-radius:7px; padding:1em; top:30%; right:0px}

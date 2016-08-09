@@ -80,6 +80,8 @@ class MeasurementsController < ApplicationController
                end
                h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name, :widget => a.widget_id, :options => options}
             end
+            # display date nicely
+            h_av[:date] = display_date(m.created_at.localtime)
 #            @attr_values.each do |av|
 #                h_av[av.aname] = av.name
 #                h_columns[av.attr_id] = {:id => av.attr_id, :name => av.aname, :field => av.aname}
@@ -115,6 +117,26 @@ class MeasurementsController < ApplicationController
     @measurement = Measurement.new
   end
 
+  def batch_new
+    if params[:project_key]
+        @project = Project.find_by_key(params[:project_key])
+        @exp = Exp.find(params[:exp_id]) if params[:exp_id]
+        @sample = Sample.find(params[:sample_id]) if params[:sample_id]
+        logger.debug('BATCH_NEW = '+params.to_s)
+        number_new_measurements = params[:number_new_measurements]
+        for i in 1..number_new_measurements.to_i
+            name = @project.name + '_' + i.to_s
+            @measurement = Measurement.new(:name => name, :user_id => session[:user_id])
+            @measurement.save!
+            @sample.measurements << @measurement
+        end
+        h_res = {}
+        respond_to do |format|
+            format.html # index.html.erb
+            format.json { render json: h_res  }
+        end
+    end
+   end
   # GET /measurements/1/edit
   def edit
   end
@@ -168,5 +190,21 @@ class MeasurementsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def measurement_params
       params[:measurement]
+    end
+    
+    def sample_params
+      params[:sample]
+    end
+    def display_date(c)
+        n = Time.now
+        html = "" #<table class='display_date'><tr><td class='day'>"
+        if n.day == c.day and n.month == c.month and n.year == c.year
+            html += "Today"
+#    elsif n.day == c.day + 1 and n.month == c.month and n.year == c.year
+#      html += "Yesterday"
+        else
+            html += "#{c.year}.#{"0" if c.month < 10}#{c.month}.#{"0" if c.day < 10}#{c.day}"
+        end
+        html += " at #{"0" if c.hour < 10}#{c.hour}:#{"0" if c.min < 10}#{c.min}:#{"0" if c.sec < 10}#{c.sec}" #</td></tr></table>"
     end
 end

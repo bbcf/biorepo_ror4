@@ -17,9 +17,10 @@
     }
         var grid;
         var columns = [
-        {id: "id", name: "Id", field: "id"},
-        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, width: 280, validator: requiredFieldValidator},
-        {id: "created_at", name: "Created_at", field: "created_at"},
+        {id: "id", name: "Id", field: "id", width: 20},
+        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, width: 200, validator: requiredFieldValidator},
+     //   {id: "created_at", name: "Created_at", field: "created_at"},
+        {id: "date", name: "created at", field: "date"},
         {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text},
         {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
         ];
@@ -73,6 +74,8 @@
 
        grid.setSelectionModel(new Slick.CellSelectionModel());
 
+       current_sample_id = data[0][grid.getColumns()[0].field];
+       
        // update SlickGrid for measurements on sample change
        grid.onClick.subscribe(function (e, args) {
             var cell = grid.getCellFromEvent(e);
@@ -82,8 +85,9 @@
             var field = grid.getColumns()[0].field
             value = row[field]
             current_sample_id = data[args.row][grid.getColumns()[0].field];
-
-            update_measurement_list();
+            if (old_sample_id != current_sample_id) {
+                update_measurement_list();
+            }
 
             // alert(data[args.row][grid.getColumns()[1].field]);
         //  if (grid.getColumns()[cell.cell].id == "id") {
@@ -187,14 +191,7 @@
                 }
                 return value;
             }
-
-        function cellClicked(e, args) {
-            alert('before');
-            var item = grid.getDataItem(args.row);
-            alert('after');
-        }
-
-
+        
         function saveSampleTable(sampleData) {
             var url = '<%= save_samples_project_path({:key => @project.key }) %>'
             jQuery.ajax({
@@ -205,7 +202,7 @@
                     processData: false,
                     data: JSON.stringify(sampleData)
                 }).done(function(h) {
-                        alert(JSON.stringify(sampleData));
+                       // alert(JSON.stringify(sampleData));
                        // window.location = h.redirect_url;
                 }).fail(function(error){
                         alert('Something has gone wrong: ' + error);
@@ -216,7 +213,9 @@
         }
 
         $('#save_samples').click(function(event){
-            saveSampleTable(data);
+            if (confirm("Do you want to save changes in Samples?")) {
+                saveSampleTable(data);
+            }
         });
 
         });

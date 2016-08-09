@@ -209,7 +209,7 @@ class ProjectsController < ApplicationController
                 end
            # new sample
            else
-                Measurement.new(:name => row[:name], :sample_id => @sample.id, :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
+                Measurement.new(:name => row[:name], :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
            end
     end
     respond_to do |format|
@@ -232,7 +232,7 @@ class ProjectsController < ApplicationController
                 @measurement.update_attributes(:name => row[:name], :raw => row[:raw], :public => row[:public], :description => row[:description])
            # new measurement 
            else
-                Measurement.new(:name => row[:name], :sample_id => @sample.id, :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
+                Measurement.new(:name => row[:name],  :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
            end
     end
     respond_to do |format|

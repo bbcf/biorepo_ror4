@@ -4,8 +4,8 @@ module ApplicationHelper
     html = "" #<table class='display_date'><tr><td class='day'>"
     if n.day == c.day and n.month == c.month and n.year == c.year
       html += "Today"
-    elsif n.day == c.day + 1 and n.month == c.month and n.year == c.year
-      html += "Yesterday"
+#    elsif n.day == c.day + 1 and n.month == c.month and n.year == c.year
+#      html += "Yesterday"
     else
       html += "#{c.year}-#{"0" if c.month < 10}#{c.month}-#{"0" if c.day < 10}#{c.day}"
     end

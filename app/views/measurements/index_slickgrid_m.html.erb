@@ -1,6 +1,10 @@
 <% if @measurements.size >0 %>
 <span class='info'><%= @measurements.size %> <%= (@measurements.size > 1 ) ? 'have' : 'has' %> been found!</span>
 <div id='MeasurementsGrid' style='height:200px'></div>
+<div id='btn_m'>
+    Add<%= number_field_tag 'number_new_batch_measures', 3,  required: true, min: 1, max: 100 %> new measurements:
+    <span id='batch_new_measures_button' class="button">Add measurements</span> 
+</div>
 <span id='save_measurements' class='button'>Save Measurements</span>
     <%= javascript_tag do %>
     function requiredFieldValidator(value) {
@@ -19,10 +23,11 @@
     }
     var grid_m;
     var columns_m = [
-        {id: "id", name: "Id", field: "id" },
-  //      {id: "exp_type_id", name: "Exp_type_id", field: "exp_type_id" },
+        {id: "id", name: "Id", field: "id", width: 20 },
+//      {id: "exp_type_id", name: "Exp_type_id", field: "exp_type_id" },
         {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
-        {id: "created_at", name: "Created_at", field: "created_at"},
+//      {id: "created_at", name: "Created_at", field: "created_at"},
+        {id: "date", name: "Created_at", field: "date"},
         {id: "raw", name: "Raw", field: "raw", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
         {id: "public", name: "Public", field: "public", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
         {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
@@ -171,7 +176,7 @@
                 return value;
             }
         
-    function saveMeasurementTable(measurementData) {
+        function saveMeasurementTable(measurementData) {
             var url = '<%= save_measurements_project_path({:key => @project.key }) %>'
             jQuery.ajax({
                     url: url,
@@ -188,13 +193,33 @@
                         console.error("POST ERROR");
                         console.error(error);
             });       
-
- 
         }
+
         $('#save_measurements').click(function(event){
-            saveMeasurementTable(data_m);
+            if (confirm("Do you want to save changes in Measurements?")) {
+                saveMeasurementTable(data_m);
+            }
         });
+        
+        $('#batch_new_measures_button').click(function(){
+            $.ajax({
+                url: '<%= batch_new_measurements_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&sample_id=' + current_sample_id + '&layout=0',
+                type: "POST",
+                data: {
+                    project_key : '<%= @project.key %>',
+                    exp_id : current_exp_id,
+                    number_new_measurements : $('#number_new_batch_measures').val() 
+                },
+                dataType: 'json',
+            }).done(function(html){
+                alert('success');
+                update_measurement_list();
+            }).fail(function(){
+                alert('failed creating new measurements');
+            });
         });
+
+     });
     <% end %>
 
 <% else %>

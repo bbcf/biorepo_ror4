@@ -322,3 +322,7 @@ alter table exps add column name text;
 -------------------------------------------------
 -- for batch upload separator symbol |
 update attr_values set name = 'Anti-RNA polymerase II Antibody, clone CTD4H8; 05-623 (Millipore)' where id = 376;
+
+
+alter table measurements add column fu_id integer;
+alter table measurements add foreign key (fu_id) references fus;
