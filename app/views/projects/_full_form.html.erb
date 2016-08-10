@@ -19,7 +19,7 @@
 
 <div class="project">
 
-<%= @user.name %>
+<%= @user.name if @user%>
 
  <table>
 <tr><td>Name</td><td><%= f.text_field :name %></td></tr>
@@ -30,12 +30,18 @@
 <div id="exp_list"></div>
 <%= render :partial => 'exp_space' %>
 <div id="new_exp_button" class="button">New experiment</div>
+
+<%  s_visibility = (@project.exps.count > 0) ? true : false %>
 <div id="sample_list"></div>
 Add <%= number_field_tag 'number_new_batch_samples', 3,  required: true, min: 1, max: 100 %> new samples:
 <div id='batch_new_samples_button' class="button">Add samples</div>
 
 
 <div id="measurement_list"></div>
+<div id='btn_m'>
+    Add<%= number_field_tag 'number_new_batch_measures', 3,  required: true, min: 1, max: 100, disabled: false %> new measurements:
+    <span id='batch_new_measures_button' class="button" >Add measurements</span> 
+</div>
 <div class="actions">
     <%= f.submit %>
 </div>
@@ -51,6 +57,7 @@ $('#exp_' + current_exp_id).toggleClass('activated');
 var current_sample_id = null;<%#= (exp = @project.exps.samples.first) ? exp.id : null %> ;
 
 function update_exp_list(){
+
  $.ajax({
   url: '<%= exps_path %>?project_key=<%= @project.key %>&layout=0',
   type: "GET",
@@ -67,12 +74,15 @@ function update_exp_list(){
 }
 
 function update_sample_list(){
+alert('update s');
 $.ajax({
   url: '<%= index_slickgrid_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&layout=0',
   type: "GET",
   dataType: 'html',
  }).done(function(html){
   // eval(responseText);
+// why if put it after next line it does not work
+   update_measurement_list();
    $('#sample_list').html(html);
    update_measurement_list();
  }).fail(function(){
@@ -81,6 +91,7 @@ $.ajax({
 }
 
 function update_measurement_list(){
+alert('update m');
  $.ajax({
   url: '<%= index_slickgrid_m_measurements_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&sample_id=' + current_sample_id + '&layout=0',
   type: "GET",
@@ -88,6 +99,7 @@ function update_measurement_list(){
  }).done(function(html){
   old_sample_id = current_sample_id;
   // eval(responseText);
+document.getElementById('btn_m').style.display = (current_sample_id == null) ? "none" : "block";
    $('#measurement_list').html(html);
  }).fail(function(){
     alert('failed update_m_list');
@@ -130,6 +142,24 @@ $.ajax({
  }).fail(function(){
     alert('failed creating new samples');
  });
+});
+
+$('#batch_new_measures_button').click(function(){
+    $.ajax({
+        url: '<%= batch_new_measurements_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&sample_id=' + current_sample_id + '&layout=0',
+        type: "POST",
+        data: {
+            project_key : '<%= @project.key %>',
+            exp_id : current_exp_id,
+            number_new_measurements : $('#number_new_batch_measures').val() 
+        },
+        dataType: 'json',
+    }).done(function(html){
+        alert('success');
+        update_measurement_list();
+    }).fail(function(){
+        alert('failed creating new measurements');
+    });
 });
 
 update_exp_list()

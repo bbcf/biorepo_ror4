@@ -246,6 +246,7 @@ class ProjectsController < ApplicationController
     def set_project
       @project = Project.find_by_key(params[:key])
       @exps = @project.exps
+      @samples = Sample.where(:exp_id => @exps.map{|e| e.id}).all
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.

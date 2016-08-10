@@ -1,10 +1,6 @@
 <% if @measurements.size >0 %>
 <span class='info'><%= @measurements.size %> <%= (@measurements.size > 1 ) ? 'have' : 'has' %> been found!</span>
 <div id='MeasurementsGrid' style='height:200px'></div>
-<div id='btn_m'>
-    Add<%= number_field_tag 'number_new_batch_measures', 3,  required: true, min: 1, max: 100 %> new measurements:
-    <span id='batch_new_measures_button' class="button">Add measurements</span> 
-</div>
 <span id='save_measurements' class='button'>Save Measurements</span>
     <%= javascript_tag do %>
     function requiredFieldValidator(value) {
@@ -40,7 +36,6 @@
     for (var i = 0; i < columns_m.length - l; ++i) {
          var index = [columns_m.length - 1 - i];
          var widget = columns_m[index]["widget"];
-//         alert(columns_m[index]["name"] +' ' + widget + ' ' + columns_m[index]["options"]);    
          
          switch(widget) {
                 case 1:
@@ -81,7 +76,6 @@
     $(function () {
 
 
-          //  var data_m = <%= raw @measurements.to_json %>;
             var data_m = <%= raw @SlickGridMeasurementData.to_json %>;
             // Need to use a DataView for the filter plugin
             var dataView_m = new Slick.Data.DataView();
@@ -201,23 +195,6 @@
             }
         });
         
-        $('#batch_new_measures_button').click(function(){
-            $.ajax({
-                url: '<%= batch_new_measurements_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&sample_id=' + current_sample_id + '&layout=0',
-                type: "POST",
-                data: {
-                    project_key : '<%= @project.key %>',
-                    exp_id : current_exp_id,
-                    number_new_measurements : $('#number_new_batch_measures').val() 
-                },
-                dataType: 'json',
-            }).done(function(html){
-                alert('success');
-                update_measurement_list();
-            }).fail(function(){
-                alert('failed creating new measurements');
-            });
-        });
 
      });
     <% end %>

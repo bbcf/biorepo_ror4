@@ -326,3 +326,6 @@ update attr_values set name = 'Anti-RNA polymerase II Antibody, clone CTD4H8; 05
 
 alter table measurements add column fu_id integer;
 alter table measurements add foreign key (fu_id) references fus;
+update measurements set fu_id = (select fu_id from fus_measurements where measurement_id = measurements.id);
+
+
