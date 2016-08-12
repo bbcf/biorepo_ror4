@@ -65,6 +65,7 @@ Rails.application.routes.draw do
       get :index_slickgrid
       get :test
       post :batch_new
+      post :save_batch
     end
   end
 

@@ -95,10 +95,11 @@ class ProjectsController < ApplicationController
     h_res={}
     
     samples_data.each do |row|
-           @sample = Sample.find(row[:id]) if row[:id]
+           @sample = Sample.find(row[:id]) if row[:id] and row[:id] > 0
            # VALIDATE PARAMETERS!!!!!!!!
            # sample already exists
            if @sample
+                logger.debug('FOUND SAMPLE: ' + @sample.id.to_s)
                 @sample.update_attributes(:name => row[:name], :protocole => row[:protocole], :description => row[:description])
                 exp_type_id = Exp.find(row[:exp_id]).exp_type_id 
                 logger.debug('EXP: = ' + exp_type_id.to_s)

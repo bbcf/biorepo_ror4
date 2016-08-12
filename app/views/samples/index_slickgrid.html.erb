@@ -15,55 +15,55 @@
             return {valid: true, msg: null};
         }
     }
-        var grid;
-        var columns = [
-        {id: "id", name: "Id", field: "id", width: 20},
-        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, width: 200, validator: requiredFieldValidator},
-     //   {id: "created_at", name: "Created_at", field: "created_at"},
-        {id: "date", name: "created at", field: "date"},
-        {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text},
-        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
-        ];
+    var grid;
+    var columns = [
+    {id: "id", name: "Id", field: "id", width: 20},
+    {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, width: 200, validator: requiredFieldValidator},
+    //  {id: "created_at", name: "Created_at", field: "created_at"},
+    {id: "date", name: "created at", field: "date"},
+    {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text},
+    {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
+    ];
 
-        // add editors to columns of attributes
-        var l = columns.length;
-        columns = $.merge(columns, <%= raw @list_columns.to_json %>);
-        for (var i = 0; i < columns.length - l; ++i) {
-            var index = [columns.length - 1 - i];
-            var widget = columns[index]["widget"];
-            switch(widget) {
-                case 1:
-                case 2:
-                    columns[index]["editor"] = Slick.Editors.Text;
-                    break;
-                case 3:
-                case 4:
-                    columns[index]["editor"] = Slick.Editors.Checkbox;
-                    columns[index]["formatter"] = Slick.Formatters.Checkmark;
-                    break;
-                case 5:
-                    columns[index]["editor"] = Slick.Editors.SelectCell;
-                    break;
-                case 6:
-                    columns[index]["editor"] = Slick.Editors.Integer;
-                    break;
-                case 7: // year
-                    columns[index]["editor"] = Slick.Editors.Integer;
-                    columns[index]["validator"] = yearFieldValidator
-                    break;
-                default:
-                    columns[index]["editor"] = Slick.Editors.Text;
-            }
+    // add editors to columns of attributes
+    var l = columns.length;
+    columns = $.merge(columns, <%= raw @list_columns.to_json %>);
+    for (var i = 0; i < columns.length - l; ++i) {
+        var index = [columns.length - 1 - i];
+        var widget = columns[index]["widget"];
+        switch(widget) {
+            case 1:
+            case 2:
+                columns[index]["editor"] = Slick.Editors.Text;
+                break;
+            case 3:
+            case 4:
+                columns[index]["editor"] = Slick.Editors.Checkbox;
+                columns[index]["formatter"] = Slick.Formatters.Checkmark;
+                break;
+            case 5:
+                columns[index]["editor"] = Slick.Editors.SelectCell;
+                break;
+            case 6:
+                columns[index]["editor"] = Slick.Editors.Integer;
+                break;
+            case 7: // year
+                columns[index]["editor"] = Slick.Editors.Integer;
+                columns[index]["validator"] = yearFieldValidator
+                break;
+            default:
+                columns[index]["editor"] = Slick.Editors.Text;
         }
-        var options = {
-            enableCellNavigation: true,
-            enableColumnReorder: false,
-            explicitInitialization: true,
-            editable: true,
-            rowHeight: 22,
-            forceFitColumns: true
-        };
-        
+    }
+    var options = {
+        enableCellNavigation: true,
+        enableColumnReorder: false,
+        explicitInitialization: true,
+        editable: true,
+        rowHeight: 22,
+        forceFitColumns: true
+    };
+    
     $(function () {
        var data = <%= raw @SlickGridSampleData.to_json %>;
        // Need to use a DataView for the filter plugin
@@ -74,13 +74,14 @@
        grid.setSelectionModel(new Slick.CellSelectionModel());
         
        if (data[0]) {
-            current_sample_id = data[0][grid.getColumns()[0].field];
-        }
-        else { 
-            current_sample_id = null;
-        }
-        alert('cur sample id = ' + current_sample_id); 
+           current_sample_id = data[0][grid.getColumns()[0].field];
+       }
+       else { 
+           current_sample_id = null;
+       }
+       //  alert('cur sample id = ' + current_sample_id); 
        // update SlickGrid for measurements on sample change
+       
        grid.onClick.subscribe(function (e, args) {
             var cell = grid.getCellFromEvent(e);
             var item = grid.getDataItem(args.row);
@@ -89,139 +90,156 @@
             var field = grid.getColumns()[0].field
             value = row[field]
             current_sample_id = data[args.row][grid.getColumns()[0].field];
-       alert('cur sample id = ' + current_sample_id); 
+            //alert('cur sample id = ' + current_sample_id); 
             if (old_sample_id != current_sample_id) {
                 update_measurement_list();
             }
 
-            // alert(data[args.row][grid.getColumns()[1].field]);
         //  if (grid.getColumns()[cell.cell].id == "id") {
         //      if (!grid.getEditorLock().commitCurrentEdit()) {
         //          return;
         //      } 
-        //  current_sample_id = data[args.row][grid.getColumns()[cell.cell].field];
-        //  update_measurement_list();
-        //  var states = { "Low": "Medium", "Medium": "High", "High": "Low" };
-        //  data[cell.row].priority = states[data[cell.row].priority];
-        //  grid.updateRow(cell.row);
+        //      current_sample_id = data[args.row][grid.getColumns()[cell.cell].field];
+        //      update_measurement_list();
+        //      var states = { "Low": "Medium", "Medium": "High", "High": "Low" };
+        //      data[cell.row].priority = states[data[cell.row].priority];
+        //      grid.updateRow(cell.row);
             
-        //  e.stopPropagation();
-        //}
-    });
+        //      e.stopPropagation();
+        //  }
+        });
 
 
-            dataView.onRowCountChanged.subscribe(function (e, args) {
-                grid.updateRowCount();
-                grid.render();
-            });
+        dataView.onRowCountChanged.subscribe(function (e, args) {
+            grid.updateRowCount();
+            grid.render();
+        });
 
-            dataView.onRowsChanged.subscribe(function (e, args) {
-                grid.invalidateRows(args.rows);
-                grid.render();
-            });
+        dataView.onRowsChanged.subscribe(function (e, args) {
+            grid.invalidateRows(args.rows);
+            grid.render();
+        });
+
+        dataView.beginUpdate();
+        dataView.setItems(data);
+        dataView.setFilter(filter);
+        dataView.endUpdate();
+
+        var filterPlugin = new Ext.Plugins.HeaderFilter({});
+
+        // This event is fired when a filter is selected
+        filterPlugin.onFilterApplied.subscribe(function () {
+            dataView.refresh();
+            grid.resetActiveCell();
+
+            // Excel like status bar at the bottom
+            var status;
+
+            if (dataView.getLength() === dataView.getItems().length) {
+                status = "";
+            } else {
+                status = dataView.getLength() + ' OF ' + dataView.getItems().length + ' RECORDS FOUND';
+            }
+            $('#status-label').text(status);
+        });
+
+        // Event fired when a menu option is selected
+        filterPlugin.onCommand.subscribe(function (e, args) {
+            dataView.fastSort(args.column.field, args.command === "sort-asc");
+        });
+
+        grid.registerPlugin(filterPlugin);
+
+        var overlayPlugin = new Ext.Plugins.Overlays({});
+
+        // Event fires when a range is selected
+        overlayPlugin.onFillUpDown.subscribe(function (e, args) {
+            var column = grid.getColumns()[args.range.fromCell];
+            // Ensure the column is editable
+            if (!column.editor) {
+                alert('no editable');
+                return;
+            }
+
+            // Find the initial value
+            var value = dataView.getItem(args.range.fromRow)[column.field];
 
             dataView.beginUpdate();
-            dataView.setItems(data);
-            dataView.setFilter(filter);
-            dataView.endUpdate();
 
-            var filterPlugin = new Ext.Plugins.HeaderFilter({});
-
-            // This event is fired when a filter is selected
-            filterPlugin.onFilterApplied.subscribe(function () {
-                dataView.refresh();
-                grid.resetActiveCell();
-
-                // Excel like status bar at the bottom
-                var status;
-
-                if (dataView.getLength() === dataView.getItems().length) {
-                    status = "";
-                } else {
-                    status = dataView.getLength() + ' OF ' + dataView.getItems().length + ' RECORDS FOUND';
-                }
-                $('#status-label').text(status);
-            });
-
-            // Event fired when a menu option is selected
-            filterPlugin.onCommand.subscribe(function (e, args) {
-                dataView.fastSort(args.column.field, args.command === "sort-asc");
-            });
-
-            grid.registerPlugin(filterPlugin);
-
-            var overlayPlugin = new Ext.Plugins.Overlays({});
-
-            // Event fires when a range is selected
-            overlayPlugin.onFillUpDown.subscribe(function (e, args) {
-                var column = grid.getColumns()[args.range.fromCell];
-                // Ensure the column is editable
-                if (!column.editor) {
-                    alert('no editable');
-                    return;
-                }
-
-                // Find the initial value
-                var value = dataView.getItem(args.range.fromRow)[column.field];
-
-                dataView.beginUpdate();
-
-                // Copy the value down
-                for (var i = args.range.fromRow + 1; i <= args.range.toRow; i++) {
-                    dataView.getItem(i)[column.field] = value;
-                    grid.invalidateRow(i);
-                }
-
-                dataView.endUpdate();
-                grid.render();
-            });
-
-            grid.registerPlugin(overlayPlugin);
-
-            grid.init();
-
-            // Filter the data (using userscores _.contains)
-            function filter(item) {
-                var columns = grid.getColumns();
-
-                var value = true;
-
-                for (var i = 0; i < columns.length; i++) {
-                    var col = columns[i];
-                    var filterValues = col.filterValues;
-
-                    if (filterValues && filterValues.length > 0) {
-                        value = value & _.contains(filterValues, item[col.field]);
-                    }
-                }
-                return value;
+            // Copy the value down
+            for (var i = args.range.fromRow + 1; i <= args.range.toRow; i++) {
+                dataView.getItem(i)[column.field] = value;
+                grid.invalidateRow(i);
             }
-        
-        function saveSampleTable(sampleData) {
-            var url = '<%= save_samples_project_path({:key => @project.key }) %>'
-            jQuery.ajax({
-                    url: url,
-                    type: "POST",
-                    dataType: 'json',
-                    contentType: "application/json",
-                    processData: false,
-                    data: JSON.stringify(sampleData)
-                }).done(function(h) {
-                       // alert(JSON.stringify(sampleData));
-                       // window.location = h.redirect_url;
-                }).fail(function(error){
-                        alert('Something has gone wrong: ' + error);
-                      //  $('.loading-wrap').remove();
-                        console.error("AJAX POST ERROR");
-                        console.error(error);
-            });       
+
+            dataView.endUpdate();
+            grid.render();
+        });
+
+        grid.registerPlugin(overlayPlugin);
+
+        grid.init();
+
+        // Filter the data (using userscores _.contains)
+        function filter(item) {
+            var columns = grid.getColumns();
+
+            var value = true;
+
+            for (var i = 0; i < columns.length; i++) {
+                var col = columns[i];
+                var filterValues = col.filterValues;
+
+                if (filterValues && filterValues.length > 0) {
+                    value = value & _.contains(filterValues, item[col.field]);
+                }
+            }
+            return value;
         }
 
-        $('#save_samples').click(function(event){
-            if (confirm("Do you want to save changes in Samples?")) {
-                saveSampleTable(data);
-            }
-        });
+// button save_samples        
+    $('#save_samples').click(function(event){
+        alert(JSON.stringify(data))
+        if (confirm("Do you want to save changes in Samples?")) {
+            saveSampleTable(data);
+        }
+    });
 
-        });
+    function saveSampleTable(sampleData) {
+        jQuery.ajax({
+                url: '<%= save_batch_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id,
+//                url: url,
+                type: "POST",
+                dataType: 'json',
+                contentType: "application/json",
+                processData: false,
+                data: JSON.stringify(sampleData)
+            }).done(function(h) {
+                   // alert(JSON.stringify(sampleData));
+                   // window.location = h.redirect_url;
+            }).fail(function(error){
+                    alert('Something has gone wrong: ' + error);
+                  //  $('.loading-wrap').remove();
+                    console.error("AJAX POST ERROR");
+                    console.error(error);
+        });       
+    }
+
+
+// button defined in views/projects/_full_project
+
+    $('#batch_new_samples_button').click(function(){
+        alert('batch new samples');
+        n_new_samples = $('#number_new_batch_samples').val(),
+        samples_data = $('#json_new_batch_samples').val()
+        addNewRow(n_new_samples, samples_data);
+     });
+
+    function addNewRow(n, d){
+        for (var i = 0; i < n; i++) {
+            var item = { "id": 0, "title": "new_" + i.to_s };             
+            dataView.addItem(item);
+        }
+    }
+});
 <% end %>

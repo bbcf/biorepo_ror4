@@ -33,13 +33,13 @@
 
 <%  s_visibility = (@project.exps.count > 0) ? true : false %>
 <div id="sample_list"></div>
-Add <%= number_field_tag 'number_new_batch_samples', 3,  required: true, min: 1, max: 100 %> new samples:
+Add <%= number_field_tag 'number_new_batch_samples', 3,  required: true, min: 1, max: 100 %> <%= text_area_tag 'json_new_batch_samples' %>new samples:
 <div id='batch_new_samples_button' class="button">Add samples</div>
 
 
 <div id="measurement_list"></div>
 <div id='btn_m'>
-    Add<%= number_field_tag 'number_new_batch_measures', 3,  required: true, min: 1, max: 100, disabled: false %> new measurements:
+    Add<%= number_field_tag 'number_new_batch_measures', 3,  required: true, min: 1, max: 100, disabled: false %> <%= text_area_tag 'json_new_batch_measurements' %> new measurements:
     <span id='batch_new_measures_button' class="button" >Add measurements</span> 
 </div>
 <div class="actions">
@@ -57,50 +57,47 @@ $('#exp_' + current_exp_id).toggleClass('activated');
 var current_sample_id = null;<%#= (exp = @project.exps.samples.first) ? exp.id : null %> ;
 
 function update_exp_list(){
-
- $.ajax({
-  url: '<%= exps_path %>?project_key=<%= @project.key %>&layout=0',
-  type: "GET",
-  dataType: 'html',
+$.ajax({
+    url: '<%= exps_path %>?project_key=<%= @project.key %>&layout=0',
+    type: "GET",
+    dataType: 'html',
  }).done(function(html){
     $('#exp_list').html(html);
     if (current_exp_id) { 
         update_sample_list();
     }
-//    current_sample_id = null;
+    // current_sample_id = null;
     old_sample_id = null;
  }).fail(function(){
  });
 }
 
 function update_sample_list(){
-alert('update s');
 $.ajax({
-  url: '<%= index_slickgrid_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&layout=0',
-  type: "GET",
-  dataType: 'html',
+    url: '<%= index_slickgrid_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&layout=0',
+    type: "GET",
+    dataType: 'html',
  }).done(function(html){
-  // eval(responseText);
-// why if put it after next line it does not work
-   update_measurement_list();
-   $('#sample_list').html(html);
-   update_measurement_list();
+    // eval(responseText);
+    // why if put it after next line it does not work
+    update_measurement_list();
+    $('#sample_list').html(html);
+    update_measurement_list();
  }).fail(function(){
     alert('failed to update s list');
  });
 }
 
 function update_measurement_list(){
-alert('update m');
  $.ajax({
-  url: '<%= index_slickgrid_m_measurements_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&sample_id=' + current_sample_id + '&layout=0',
-  type: "GET",
-  dataType: 'html',
+    url: '<%= index_slickgrid_m_measurements_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&sample_id=' + current_sample_id + '&layout=0',
+    type: "GET",
+    dataType: 'html',
  }).done(function(html){
-  old_sample_id = current_sample_id;
-  // eval(responseText);
-document.getElementById('btn_m').style.display = (current_sample_id == null) ? "none" : "block";
-   $('#measurement_list').html(html);
+    old_sample_id = current_sample_id;
+    // eval(responseText);
+    document.getElementById('btn_m').style.display = (current_sample_id == null) ? "none" : "block";
+    $('#measurement_list').html(html);
  }).fail(function(){
     alert('failed update_m_list');
  });
@@ -118,30 +115,31 @@ function call_exp_form(){
 }
 
 // add new experiment to the project
-
 $('#new_exp_button').click(function(){
     call_exp_form();
     $('#popup').toggleClass('hidden');
 });
 
 // add new empty samples by batch
-
-$('#batch_new_samples_button').click(function(){
-$.ajax({
-  url: '<%= batch_new_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id,
-  type: "POST",
-  data: {
-   project_key : '<%= @project.key %>',
-   exp_id : current_exp_id,
-   nber_new_samples : $('#number_new_batch_samples').val() 
-  },
-  dataType: 'json',
- }).done(function(html){
-    alert('success');
-  update_sample_list();
- }).fail(function(){
-    alert('failed creating new samples');
- });
+// currently blocked
+$('#1_batch_new_samples_button').click(function(){
+    alert($('#json_new_batch_samples').val());
+    $.ajax({
+        url: '<%= batch_new_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id,
+        type: "POST",
+        data: {
+            project_key : '<%= @project.key %>',
+            exp_id : current_exp_id,
+            nber_new_samples : $('#number_new_batch_samples').val(),
+            samples_data: $('#json_new_batch_samples').val()
+        },
+        dataType: 'json',
+    }).done(function(html){
+        alert('success');
+        update_sample_list();
+    }).fail(function(){
+        alert('failed creating new samples');
+    });
 });
 
 $('#batch_new_measures_button').click(function(){
