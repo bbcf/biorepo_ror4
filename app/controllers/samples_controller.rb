@@ -67,14 +67,14 @@ class SamplesController < ApplicationController
               #  av = AttrValue.joins("join attr_values_samples on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attr_values.*")
                av = AttrValue.joins("join attr_values_samples on (attr_values.id = attr_value_id)").where(h_avcondition).select("attr_values.*")
                (av.count > 0) ? h_av[a.name] = av.first.name : h_av[a.name] = ''
-               options = ""
-               if a.widget_id == 5
-                    av_options = AttrValue.where({:attr_id => a.id}).order(:name)
-                    av_options.each do |avo|
-                        options = options + "," + avo.name
-                    end
-               end
-               h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name, :widget => a.widget_id, :options => options}
+          #     options = ""
+          #     if a.widget_id == 5
+          #          av_options = AttrValue.where({:attr_id => a.id}).order(:name)
+          #          av_options.each do |avo|
+          #              options = options + "," + avo.name
+          #          end
+          #     end
+          #     h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name, :widget => a.widget_id, :options => options}
             end
             # display date nicely
             h_av[:date] = display_date(s.created_at.localtime)
@@ -87,6 +87,17 @@ class SamplesController < ApplicationController
             # merge samples.* with {attrs: attr_values} for SlickGrid data
             @SlickGridSampleData.push( s.attributes.merge(h_av))
           end
+          # fill data for columns for SlickGrid
+            @attrs.each do |a|
+               options = ""
+               if a.widget_id == 5
+                    av_options = AttrValue.where({:attr_id => a.id}).order(:name)
+                    av_options.each do |avo|
+                        options = options + "," + avo.name
+                    end
+               end
+               h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name, :widget => a.widget_id, :options => options}
+            end
           # sort attributes by id and get list of them
           @list_columns = h_columns.values.sort{|a, b| a[:id] <=> b[:id]}
         else

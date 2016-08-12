@@ -18,7 +18,7 @@
     var grid;
     var columns = [
     {id: "id", name: "Id", field: "id", width: 20},
-    {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, width: 200, validator: requiredFieldValidator},
+    {id: "name", name: "Title", field: "name", editor: Slick.Editors.Text, width: 200, validator: requiredFieldValidator},
     //  {id: "created_at", name: "Created_at", field: "created_at"},
     {id: "date", name: "created at", field: "date"},
     {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text},
@@ -28,6 +28,7 @@
     // add editors to columns of attributes
     var l = columns.length;
     columns = $.merge(columns, <%= raw @list_columns.to_json %>);
+    alert(columns[columns.length - 1].name);
     for (var i = 0; i < columns.length - l; ++i) {
         var index = [columns.length - 1 - i];
         var widget = columns[index]["widget"];
@@ -200,9 +201,10 @@
 // button save_samples        
     $('#save_samples').click(function(event){
         alert(JSON.stringify(data))
-        if (confirm("Do you want to save changes in Samples?")) {
+        if (confirm("Do you want to save changes in Samples? All unsaved data will be removed.")) {
             saveSampleTable(data);
         }
+        update_sample_list();
     });
 
     function saveSampleTable(sampleData) {
@@ -237,7 +239,7 @@
 
     function addNewRow(n, d){
         for (var i = 0; i < n; i++) {
-            var item = { "id": 0, "title": "new_" + i.to_s };             
+            var item = { "id": 0, "name": "new_" };             
             dataView.addItem(item);
         }
     }
