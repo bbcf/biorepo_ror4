@@ -51,14 +51,17 @@ class ExpsController < ApplicationController
   # POST /exps
   # POST /exps.json
   def create
+    logger.debug('EXP CREATE PARAMS: ' + params.to_s)
+    if params[:project_key]
+      @project =  Project.find_by_key(params[:project_key])
+    end
     @exp = Exp.new(exp_params)
+    @exp.project_id = @project.id
     @exp.user_id = session[:user_id]
+
     respond_to do |format|
       if @exp.save
-        if params[:project_key]
-          @project =  Project.find_by_key(params[:project_key])
-          @project.exps << @exp if !@project.exps.include?(@exp) 
-        end
+        @project.exps << @exp if !@project.exps.include?(@exp) 
         format.html { redirect_to action: :index, project_key: @project.key, layout: 0, notice: 'Exp was successfully created.' }
         format.json { render :show, status: :created, location: @exp }
       else
@@ -85,10 +88,15 @@ class ExpsController < ApplicationController
   # DELETE /exps/1
   # DELETE /exps/1.json
   def destroy
-    @exp.destroy
+    res = {:error => ''}
+    if ( Sample.exists?(:exp_id => @exp.id))
+        res = {:error => 'cannot delete experiment with samples.'}
+    else
+        @exp.destroy
+    end
     respond_to do |format|
       format.html { redirect_to exps_url, notice: 'Exp was successfully destroyed.' }
-      format.json { head :no_content }
+      format.json { render :json => res}
     end
   end
 
@@ -100,6 +108,6 @@ class ExpsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def exp_params
-      params.require(:exp).permit(:name, :exp_type_id)
+      params.require(:exp).permit(:name, :exp_type_id )
     end
 end

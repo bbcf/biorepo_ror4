@@ -1,3 +1,0 @@
-<%= form_for @exp, url: batch_upload_exp_path(@exp) do |f| %> 
-
-<% end %>

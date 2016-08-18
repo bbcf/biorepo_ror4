@@ -52,5 +52,12 @@ background: LightSteelBlue none repeat scroll 0 0;
 background-color: #f5f1d8;
 }
 .cell.activated {
+background-color: black;
+}
+.erow {
+background-color: #f5f1d8;
+}
+.erow.activated {
 background-color: #ccc;
 }
+

@@ -1,8 +1,12 @@
-<% if @measurements.size >0 %>
+<% if @measurements.size >=0 %>
 <span class='info'><%= @measurements.size %> <%= (@measurements.size > 1 ) ? 'have' : 'has' %> been found!</span>
 <div id='MeasurementsGrid' style='height:200px'></div>
 <span id='save_measurements' class='button'>Save Measurements</span>
-    <%= javascript_tag do %>
+<%= javascript_tag do %>
+    document.getElementById('save_measurements').style.display = (current_measurement_id == null) ? "table-cell" : "none";
+////    document.getElementById('save_measurements').style.display = (<%#= @measurements.size > 0 %>) ? "table-cell" : "none";
+    document.getElementById('measurement_list').style.display = (current_sample_id > 0 ) ? "table-cell" : "none";
+
     function requiredFieldValidator(value) {
         if (value == null || value == undefined || !value.length) {
             return {valid: false, msg: "This is a required field"};
@@ -20,7 +24,6 @@
     var grid_m;
     var columns_m = [
         {id: "id", name: "Id", field: "id", width: 20 },
-//      {id: "exp_type_id", name: "Exp_type_id", field: "exp_type_id" },
         {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
 //      {id: "created_at", name: "Created_at", field: "created_at"},
         {id: "date", name: "Created_at", field: "date"},
@@ -62,27 +65,28 @@
             }
      }
 
-        var options_m = {
-//    enableAddRow: true,
- //   asyncEditorLoading: false,
- //   autoEdit: false,
-            enableCellNavigation: true,
-            enableColumnReorder: false,
-            explicitInitialization: true,
-            editable: true,
-            rowHeight: 22,
-            forceFitColumns: true
-        };
+     var options_m = {
+         enableCellNavigation: true,
+         enableColumnReorder: false,
+         explicitInitialization: true,
+         editable: true,
+         rowHeight: 22,
+         forceFitColumns: true
+     };
+
     $(function () {
-
-
             var data_m = <%= raw @SlickGridMeasurementData.to_json %>;
             // Need to use a DataView for the filter plugin
             var dataView_m = new Slick.Data.DataView();
-
             grid_m = new Slick.Grid("#MeasurementsGrid", dataView_m, columns_m, options_m);
-
             grid_m.setSelectionModel(new Slick.CellSelectionModel());
+
+            if (data_m[0]) {
+                current_measurement_id = data_m[0][grid_m.getColumns()[0].field];
+            }
+            else {
+                current_measurement_id = null;
+            }
 
             dataView_m.onRowCountChanged.subscribe(function (e, args) {
                 grid_m.updateRowCount();
@@ -123,7 +127,6 @@
             });
 
             grid_m.registerPlugin(filterPlugin);
-
             var overlayPlugin = new Ext.Plugins.Overlays({});
 
             // Event fires when a range is selected
@@ -134,10 +137,8 @@
                 if (!column.editor) {
                     return;
                 }
-
                 // Find the initial value
                 var value = dataView_m.getItem(args.range.fromRow)[column.field];
-
                 dataView_m.beginUpdate();
 
                 // Copy the value down
@@ -145,24 +146,19 @@
                     dataView_m.getItem(i)[column.field] = value;
                     grid_m.invalidateRow(i);
                 }
-
                 dataView_m.endUpdate();
                 grid_m.render();
             });
 
             grid_m.registerPlugin(overlayPlugin);
-
             grid_m.init();
 
             function filter(item) {
                 var columns = grid_m.getColumns();
-
                 var value = true;
-
                 for (var i = 0; i < columns.length; i++) {
                     var col = columns[i];
                     var filterValues = col.filterValues;
-
                     if (filterValues && filterValues.length > 0) {
                         value = value & _.contains(filterValues, item[col.field]);
                     }
@@ -170,31 +166,50 @@
                 return value;
             }
         
-        function saveMeasurementTable(measurementData) {
-            var url = '<%= save_measurements_project_path({:key => @project.key }) %>'
-            jQuery.ajax({
-                    url: url,
-                    type: "POST",
-                    dataType: 'json',
-                    contentType: "application/json",
-                    processData: false,
-                    data: JSON.stringify(measurementData)
-                }).done(function(h) {
-                       // window.location = h.redirect_url;
-                }).fail(function(error){
-                        alert('Something has gone wrong: ' + error);
-                      //  $('.loading-wrap').remove();
-                        console.error("POST ERROR");
-                        console.error(error);
-            });       
-        }
+    function saveMeasurementTable(measurementData) {
+        var url = '<%= save_measurements_project_path({:key => @project.key }) %>'
+        jQuery.ajax({
+                url: '<%= save_batch_measurements_path %>?project_key=<%= @project.key %>&sample_id=' +current_sample_id+'&exp_id=' + current_exp_id,
+            //    url: url,
+                type: "POST",
+                dataType: 'json',
+                contentType: "application/json",
+                processData: false,
+                data: JSON.stringify(measurementData)
+            }).done(function(h) {
+                   // window.location = h.redirect_url;
+            }).fail(function(error){
+                    alert('Something has gone wrong: ' + error);
+                  //  $('.loading-wrap').remove();
+                    console.error("POST ERROR");
+                    console.error(error);
+        });       
+    }
 
-        $('#save_measurements').click(function(event){
-            if (confirm("Do you want to save changes in Measurements?")) {
-                saveMeasurementTable(data_m);
-            }
-        });
+    $('#save_measurements').click(function(event){
+        alert(JSON.stringify(data_m));
+        if (confirm("Do you want to save changes in Measurements?")) {
+            saveMeasurementTable(data_m);
+        }
+        update_measurement_list();
+    });
         
+// button defined in views/projects/_full_project
+
+    $('#batch_new_measurements_button').click(function(){
+        alert('batch new measurements');
+        n_new_measurements = $('#number_new_batch_measurements').val(),
+        measurements_data = $('#json_new_batch_measurements').val()
+        addNewRowM(n_new_measurements, measurements_data);
+        document.getElementById('save_measurements').style.display = "table-cell";
+     });
+
+    function addNewRowM(n, d){
+        for (var i = 0; i < n; i++) {
+            var item = { "id": 0, "name": "new_" };             
+            dataView_m.addItem(item);
+        }
+    }
 
      });
     <% end %>

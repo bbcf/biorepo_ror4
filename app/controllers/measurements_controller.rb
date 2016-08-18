@@ -60,34 +60,38 @@ class MeasurementsController < ApplicationController
         @attrs = Attr.joins("join attrs_exp_types on (attrs.id = attr_id)").where(h_condition).select("exp_type_id, attrs.*").all 
 
         h_columns = {}
-        @measurements.each do |m| 
-            # get attr_values for each measurement of this sample of this exp_type
+        @measurements.each do |m|
+# if could do left cross join with attrs - attr_values (even empty) 
 #            h_avcondition = {:attr_values_measurements => {:measurement_id => m.id}, :attr_id => @attrs.map{|a| a.id}}
 #            @attr_values = AttrValue.joins("join attr_values_measurements on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avcondition).select("attrs.name as aname, measurement_id as mid, attr_values.*").all
+#            @attr_values.each do |av|
+#                h_av[av.aname] = av.name
+#                h_columns[av.attr_id] = {:id => av.attr_id, :name => av.aname, :field => av.aname}
+#            end
+            # get attr_values for each measurement of this sample of this exp_type
             h_av = {}
             @attrs.each do |a|
                logger.debug("ATTR.name = " + a.name + ' ' + a.widget_id.to_s)
                h_avcondition = {:attr_values_measurements => {:measurement_id => m.id}, :attr_id => a.id}
                av = AttrValue.joins("join attr_values_measurements on (attr_values.id = attr_value_id)").where(h_avcondition).select("attr_values.*")
                (av.count > 0) ? (h_av[a.name] = av.first.name) : h_av[a.name] = ''
-               # collect attr_values as options for SlickGrid.SelectCelEditor
-               options = ""
-               if a.widget_id == 5
-                    av_options = AttrValue.where({:attr_id => a.id}).order(:name)
-                    av_options.each do |avo|
-                        options = options + "," + avo.name
-                    end
-               end
-               h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name, :widget => a.widget_id, :options => options}
             end
             # display date nicely
             h_av[:date] = display_date(m.created_at.localtime)
-#            @attr_values.each do |av|
-#                h_av[av.aname] = av.name
-#                h_columns[av.attr_id] = {:id => av.attr_id, :name => av.aname, :field => av.aname}
-#            end
             @SlickGridMeasurementData.push(m.attributes.merge(h_av.merge({:exp_id => params[:exp_id]})))
         end                                 
+        # collect attr_values as options for SlickGrid.SelectCelEditor
+        @attrs.each do |a|
+           # collect attr_values as options for SlickGrid.SelectCelEditor
+           options = ""
+           if a.widget_id == 5
+                av_options = AttrValue.where({:attr_id => a.id}).order(:name)
+                av_options.each do |avo|
+                    options = options + "," + avo.name
+                end
+           end
+           h_columns[a.id] = {:id => a.id, :name => a.name, :field => a.name, :widget => a.widget_id, :options => options}
+        end
         @list_columns_m = h_columns.values.sort{|a, b| a[:id] <=> b[:id]}
       else
         @projects = Project.where(:user_id => @user.id).all
@@ -117,7 +121,7 @@ class MeasurementsController < ApplicationController
     @measurement = Measurement.new
   end
 
-  def batch_new
+  def batch_new_deprecated
     if params[:project_key]
         @project = Project.find_by_key(params[:project_key])
         @exp = Exp.find(params[:exp_id]) if params[:exp_id]
@@ -137,6 +141,40 @@ class MeasurementsController < ApplicationController
         end
     end
    end
+
+  # POST
+  def save_batch
+    logger.debug('SAVE_MEASUREMENTS: ' + params.to_s)
+    measurements_data = params[:_json]
+    exp_id = params[:exp_id]
+    exp_type_id = Exp.find(exp_id).exp_type_id
+    @sample = Sample.find(params[:sample_id]) if params[:sample_id]
+    h_res={}
+    
+    measurements_data.each do |row|
+    #exp_type_id = Exp.find(row[:exp_id]).exp_type_id 
+        if row[:id] and row[:id] > 0
+            @measurement = Measurement.find(row[:id]) 
+        end
+        # measurement already exists
+        if @measurement
+             @measurement.update_attributes(:name => row[:name], :raw => row[:raw], :public => row[:public], :description => row[:description])
+             logger.debug('EXP: = ' + exp_type_id.to_s)
+        # new sample
+        else
+             logger.debug('NEW M: = ')
+             @measurement = Measurement.new(:name => row[:name], :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
+             @measurement.save!
+             @sample.measurements << @measurement
+        end
+        update_attrs(row, exp_type_id)
+        @measurement = nil
+    end
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: h_res  }
+    end
+  end
   # GET /measurements/1/edit
   def edit
   end
@@ -171,6 +209,49 @@ class MeasurementsController < ApplicationController
     end
   end
 
+  def update_attrs(row, exp_type_id)
+      # get attributes for this experiment type
+      # can be done only once
+      h_condition = (exp_type_id) ? { :attrs_exp_types => {:exp_type_id => exp_type_id}, :owner => 'measurement'} :  {:owner => 'measurement'}
+      @attrs = Attr.joins("join attrs_exp_types on (attrs.id = attr_id)").where(h_condition).select("attrs.*").all                
+      @attrs.each do |a|
+        if row[a.name]
+          logger.debug('M ATTR: ' + a.name.to_s)
+          # select old atr_value for this measurement
+          h_avo_condition = {:attr_values_measurements => {:measurement_id => row[:id]}, :attr_id => a.id}
+          @attr_value_old = AttrValue.joins("join attr_values_measurements on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avo_condition).select("attrs.name as aname, attr_values.*").first # all
+          logger.debug('mid = ' + row[:id].to_s + '; avid = ' + @attr_value_old.id.to_s + '; avname = ' + @attr_value_old.name.to_s) if @attr_value_old
+          # if attr_value was deleted in SlickGrid
+          if row[a.name].empty?
+              logger.debug('DELETE old av and empty new av: ')
+              @measurement.attr_values.delete(@attr_value_old) if @attr_value_old
+          # there is a new attr_value in SlickGrid
+          else
+              # select new attr_value from SlickGrid
+              attr_value_name = row[a.name]
+              h_avn_condition = { :attr_id => a.id, :name => row[a.name]}
+              @attr_value_new = AttrValue.joins(" join attrs on (attrs.id = attr_values.attr_id)").where(h_avn_condition).select("attrs.name as aname, attr_values.*").first # all
+              # if not existing attr_value - save in DB
+              if !@attr_value_new # and !row[a.name].empty?
+                  logger.debug('ADD new av in DB')
+                  @attr_value_new = AttrValue.new(:name => row[a.name], :attr_id => a.id)
+                  @attr_value_new.save!
+              end
+              logger.debug('NEW avn: ' + @attr_value_new.name.to_s)
+              # if attr_value was not changed in SlickGrid do nothing
+              if @measurement.attr_values.include?(@attr_value_new)
+                  logger.debug('NOT changed for  sid = ' + row[:id].to_s + '; aname = '+ @attr_value_new.aname + '; avid = ' + @attr_value_new.id.to_s + '; avname = ' + @attr_value_new.name.to_s)
+              else
+                  # delete old attr_value in DB
+                  logger.debug('ADD and DELETE')
+                  @measurement.attr_values.delete(@attr_value_old) if @attr_value_old
+                  @measurement.attr_values << @attr_value_new
+              end
+          end
+        end
+      end
+  end
+
   # DELETE /measurements/1
   # DELETE /measurements/1.json
   def destroy
@@ -195,6 +276,7 @@ class MeasurementsController < ApplicationController
     def sample_params
       params[:sample]
     end
+
     def display_date(c)
         n = Time.now
         html = "" #<table class='display_date'><tr><td class='day'>"

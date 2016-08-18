@@ -89,7 +89,7 @@ class ProjectsController < ApplicationController
   end
 
   # POST
-  def save_samples
+  def save_samples_deprecated
     logger.debug('SAVE_SAMPLES: ' + params.to_s)
     samples_data = params[:_json]
     h_res={}
@@ -103,6 +103,7 @@ class ProjectsController < ApplicationController
                 @sample.update_attributes(:name => row[:name], :protocole => row[:protocole], :description => row[:description])
                 exp_type_id = Exp.find(row[:exp_id]).exp_type_id 
                 logger.debug('EXP: = ' + exp_type_id.to_s)
+#----
                 # get attributes for this experiment type
                 # can be done only once
                 h_condition = (exp_type_id) ? { :attrs_exp_types => {:exp_type_id => exp_type_id}, :owner => 'sample'} :  {:owner => 'sample'}
@@ -155,7 +156,7 @@ class ProjectsController < ApplicationController
   end
 
   # POST
-  def save_measurements
+  def save_measurements_deprecated
     logger.debug('SAVE_MEASUREMENTS: ' + params.to_s)
     measurements_data = params[:_json]
     h_res={}
@@ -218,31 +219,8 @@ class ProjectsController < ApplicationController
       format.json { render json: h_res  }
     end
   end
-  # POST
-  def save_measurements_old
-    logger.debug('SAVE_MEASUREMENTS: ' + params.to_s)
-    measurements_data = params[:_json]
-    h_res={}
-    
-    measurements_data.each do |row|
-           @measurement = Measurement.find(row[:id]) if row[:id]
-           # measurement already exists
-           # if row[:id]
-           # VALIDATE PARAMETERS!!!!!!!!
-           if @measurement
-                @measurement.update_attributes(:name => row[:name], :raw => row[:raw], :public => row[:public], :description => row[:description])
-           # new measurement 
-           else
-                Measurement.new(:name => row[:name],  :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
-           end
-    end
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render json: h_res  }
-    end
-
-  end
-  private
+  
+private
     # Use callbacks to share common setup or constraints between actions.
     def set_project
       @project = Project.find_by_key(params[:key])

@@ -1,31 +1,79 @@
-<p id="notice"><%= notice %></p>
-
-<h1>Listing Exps</h1>
-
-<table>
-  <thead>
+<table id = 'ExpGrid'>
+<% display_id = (admin?) ? 'block' : 'none' %>
+<thead>
     <tr>
-      <th>Label</th>
-      <th>Experiment type</th>
-      <th>Actions</th>
-        </tr>
-  </thead>
+        <th style='display: <%= display_id %>'>Id</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Action</th>
+        <th>Action</th>
+    </tr>
+</thead>
+<tbody>
+<% @project.exps.each do |exp| %>
+<%= display_destroy = (@user.id == exp.user_id || admin?) ? 'block' : 'none'%>
+    <tr class = 'erow' id = 'exp_<%=exp.id %>' >
+        <td class='ecell' style='display: <%= display_id %>'><%= exp.id %></td>
+        <td class='ecell'><%= exp.name %></td>
+        <td class='ecell'><%= exp.exp_type.name %></td>
 
-  <tbody>
-    <% @exps.each do |exp| %>
-      <tr>
-	<td><%= exp.name %></td>
-	<td><%= exp.exp_type.name %></td>
-        <td><%= link_to 'Show', exp %>
+        <td class='ecell'><%#= link_to 'Show', exp %>
         | <%= link_to 'Edit', edit_exp_path(exp) %>
-        | <%= link_to 'Destroy', exp, method: :delete, data: { confirm: 'Are you sure?' } %>
-        | <%#= link_to 'Batch upload', batch_upload_form_exp_path(exp) %>
-</td>
-      </tr>
-    <% end %>
-  </tbody>
+        |<td><span class='exp_destroy_link' id='exp_destroy_<%= exp.id %>'style='display: <%= display_destroy %>' >destroy</span></td>
+        | <%#= link_to 'Destroy', edit_project_path(@project.key), method: :delete, data: { confirm: 'Are you sure?' }, {:class => 'exp_destroy_link'} %>
+         <%#= link_to 'Batch upload', batch_upload_form_exp_path(exp) %>
+        </td>
+
+    </tr>
+
+<% end %>
+</tbody>
 </table>
 
-<br>
+<%= javascript_tag do %>
 
-<%= link_to 'New Exp', new_exp_path %>
+current_exp_id = <%= (@project.exps.count > 0) ? @project.exps.first.id : 'null' %> ;
+alert('load exp_list: ' + current_exp_id);
+$('#exp_' + current_exp_id).toggleClass('activated');
+
+$('.ecell').on('click', function() {
+    old_exp_id = current_exp_id;
+    current_exp_id = $(this).parent().attr("id").split('_')[1];
+//    alert('click: new=' + current_exp_id + ', old = ' + old_exp_id);
+    if (old_exp_id != current_exp_id) {
+        $('#exp_' + current_exp_id).toggleClass('activated');
+        $('#exp_' + old_exp_id).toggleClass('activated');
+        update_sample_list();
+    }
+});
+
+
+$('.exp_destroy_link').click(function(){ 
+    old_exp_id = current_exp_id;
+    current_exp_id = this.id.split('_')[2]; 
+//    alert('destroy exp: ' + current_exp_id);
+// hack to imitate click on the row
+    if (old_exp_id != current_exp_id) {
+        $('#exp_' + current_exp_id).toggleClass('activated');
+        $('#exp_' + old_exp_id).toggleClass('activated');
+        update_sample_list();
+    }
+    var url = '<%= exps_path %>/'  + current_exp_id;
+    alert(url);
+    $.ajax({
+        url: url,
+        type: "DELETE",
+        dataType: 'json'
+    }).done(function(res){
+        if (res['error']) {
+            alert(res['error']);
+        } else {
+            old_exp_id = null;
+            update_exp_list();
+        }
+    }).fail(function(){
+        alert('Failed to complete AJAX call to delete experiment!');
+    }); 
+});
+
+<% end %>

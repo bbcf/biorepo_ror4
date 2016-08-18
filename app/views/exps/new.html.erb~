@@ -1,5 +1,0 @@
-<h1>New Exp</h1>
-
-<%= render 'form' %>
-
-<%= link_to 'Back', exps_path %>
