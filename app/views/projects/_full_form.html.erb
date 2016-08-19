@@ -59,7 +59,7 @@ var old_exp_id = null;
 function update_exp_list(){
     current_exp_id = <%= (Exp.exists?(:project_id => @project.id)) ?  @project.exps.first.id : 'null' %> ;
 //    current_exp_id = <%#= (@project.exps.count > 0) ?  @project.exps.first.id : 'null' %> ;
-    alert('update exp_list' + current_exp_id);    
+    //alert('update exp_list' + current_exp_id);    
 
 $.ajax({
     url: '<%= exps_path %>?project_key=<%= @project.key %>&layout=0',
@@ -81,7 +81,7 @@ $.ajax({
 }
 
 function update_sample_list(){
-    alert('update s');
+    //alert('update s');
 $.ajax({
     url: '<%= index_slickgrid_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id + '&layout=0',
     type: "GET",
@@ -109,11 +109,10 @@ function update_measurement_list(){
     type: "GET",
     dataType: 'html',
  }).done(function(html){
-    alert('update m ' + current_sample_id);
 //    old_sample_id = current_sample_id;
     $('#measurement_list').html(html);
     // eval(responseText);
-    alert('update m_list: cur sample id = ' + current_sample_id + ', cur m id = ' + current_measurement_id);
+    //alert('update m_list: cur sample id = ' + current_sample_id + ', cur m id = ' + current_measurement_id);
     document.getElementById('save_measurements').style.display = (current_measurement_id == null) ? "none" : "table-cell";
     document.getElementById('btn_m').style.display = (current_sample_id == null) ? "none" : "block";
     document.getElementById('measurement_list').style.display = (current_sample_id == null) ? "none" : "table-cell";
@@ -140,48 +139,5 @@ function call_exp_form(){
 }
 
 update_exp_list()
-
-// add new empty samples by batch
-// currently blocked - samples are added without saving 
-// and then saved by pressing the button "save samples"
-/*
-$('#1_batch_new_samples_button').click(function(){
-    alert($('#json_new_batch_samples').val());
-    $.ajax({
-        url: '<%#= batch_new_samples_path %>?project_key=<%#= @project.key %>&exp_id=' + current_exp_id,
-        type: "POST",
-        data: {
-            project_key : '<%#= @project.key %>',
-            exp_id : current_exp_id,
-            nber_new_samples : $('#number_new_batch_samples').val(),
-            samples_data: $('#json_new_batch_samples').val()
-        },
-        dataType: 'json',
-    }).done(function(html){
-        alert('success');
-        update_sample_list();
-    }).fail(function(){
-        alert('failed creating new samples');
-    });
-});
-
-$('#1_batch_new_measurements_button').click(function(){
-    $.ajax({
-        url: '<%#= batch_new_measurements_path %>?project_key=<%#= @project.key %>&exp_id=' + current_exp_id + '&sample_id=' + current_sample_id + '&layout=0',
-        type: "POST",
-        data: {
-            project_key : '<%#= @project.key %>',
-            exp_id : current_exp_id,
-            number_new_measurements : $('#number_new_batch_measurements').val() 
-        },
-        dataType: 'json',
-    }).done(function(html){
-        alert('success');
-        update_measurement_list();
-    }).fail(function(){
-        alert('failed creating new measurements');
-    });
-});
-*/
 
 <% end %>

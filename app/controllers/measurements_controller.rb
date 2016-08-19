@@ -70,6 +70,7 @@ class MeasurementsController < ApplicationController
 #            end
             # get attr_values for each measurement of this sample of this exp_type
             h_av = {}
+            logger.debug('INDEX SG MEASUREMENTS: ' + m.id.to_s + ', raw = ' + m.raw.to_s + ', desc = ' + m.description.to_s)
             @attrs.each do |a|
                logger.debug("ATTR.name = " + a.name + ' ' + a.widget_id.to_s)
                h_avcondition = {:attr_values_measurements => {:measurement_id => m.id}, :attr_id => a.id}

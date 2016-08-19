@@ -70,7 +70,6 @@
     };
     
     $(function () {
-//        alert('slickgrid s');
        var data = <%= raw @SlickGridSampleData.to_json %>;
        // Need to use a DataView for the filter plugin
        var dataView = new Slick.Data.DataView();
@@ -184,7 +183,7 @@
 
 // button save_samples        
     $('#save_samples').click(function(event){
-//        alert(JSON.stringify(data))
+        alert(JSON.stringify(data))
         if (confirm("Do you want to save changes in Samples? All unsaved data will be removed.")) {
             saveSampleTable(data);
         }
@@ -215,7 +214,6 @@
 // button defined in views/projects/_full_project
 
     $('#batch_new_samples_button').click(function(){
-        alert('batch new samples');
         n_new_samples = $('#number_new_batch_samples').val(),
         samples_data = $('#json_new_batch_samples').val()
         addNewRow(n_new_samples, samples_data);
@@ -223,9 +221,23 @@
      });
 
     function addNewRow(n, d){
-        for (var i = 0; i < n; i++) {
-            var item = { "id": 0, "name": "new_" };             
-            dataView.addItem(item);
+        if (!d.length) {
+            for (var i = 0; i < n; i++) {
+                var item = { "id": 0, "name": "new_" };             
+                dataView.addItem(item);
+            }
+        } else {
+            sd = JSON.parse(d); 
+            for (var i = 0; i < sd.length; i++) {
+                var item = {};
+                item["id"] = 0;
+                // skip id
+                for (var j = 1; j < columns.length; j++) {
+                    item[columns[j]["field"]] = sd[i][columns[j]["field"]];
+                }
+//              alert(JSON.stringify(item);
+                dataView.addItem(item);
+            }
         }
     }
 });

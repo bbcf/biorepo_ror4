@@ -4,7 +4,6 @@
 <span id='save_measurements' class='button'>Save Measurements</span>
 <%= javascript_tag do %>
     document.getElementById('save_measurements').style.display = (current_measurement_id == null) ? "table-cell" : "none";
-////    document.getElementById('save_measurements').style.display = (<%#= @measurements.size > 0 %>) ? "table-cell" : "none";
     document.getElementById('measurement_list').style.display = (current_sample_id > 0 ) ? "table-cell" : "none";
 
     function requiredFieldValidator(value) {
@@ -35,7 +34,6 @@
     // add editors to columns of attributes
     var l = columns_m.length;
     columns_m = $.merge(columns_m, <%= raw @list_columns_m.to_json %>);
-//    alert(JSON.stringify(columns_m));
     for (var i = 0; i < columns_m.length - l; ++i) {
          var index = [columns_m.length - 1 - i];
          var widget = columns_m[index]["widget"];
@@ -167,10 +165,8 @@
             }
         
     function saveMeasurementTable(measurementData) {
-        var url = '<%= save_measurements_project_path({:key => @project.key }) %>'
         jQuery.ajax({
                 url: '<%= save_batch_measurements_path %>?project_key=<%= @project.key %>&sample_id=' +current_sample_id+'&exp_id=' + current_exp_id,
-            //    url: url,
                 type: "POST",
                 dataType: 'json',
                 contentType: "application/json",
