@@ -23,7 +23,7 @@
     var grid_m;
     var columns_m = [
         {id: "id", name: "Id", field: "id", width: 20 },
-        {id: "title", name: "Title", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
+        {id: "name", name: "Name", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
 //      {id: "created_at", name: "Created_at", field: "created_at"},
         {id: "date", name: "Created_at", field: "date"},
         {id: "raw", name: "Raw", field: "raw", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
@@ -78,6 +78,7 @@
             var dataView_m = new Slick.Data.DataView();
             grid_m = new Slick.Grid("#MeasurementsGrid", dataView_m, columns_m, options_m);
             grid_m.setSelectionModel(new Slick.CellSelectionModel());
+//            alert(JSON.stringify(columns_m));
 
             if (data_m[0]) {
                 current_measurement_id = data_m[0][grid_m.getColumns()[0].field];
@@ -196,18 +197,35 @@
         alert('batch new measurements');
         n_new_measurements = $('#number_new_batch_measurements').val(),
         measurements_data = $('#json_new_batch_measurements').val()
-        addNewRowM(n_new_measurements, measurements_data);
+        addNewRow_m(n_new_measurements, measurements_data);
         document.getElementById('save_measurements').style.display = "table-cell";
      });
 
-    function addNewRowM(n, d){
-        for (var i = 0; i < n; i++) {
-            var item = { "id": 0, "name": "new_" };             
-            dataView_m.addItem(item);
+    function addNewRow_m(n, d){
+        alert('addnewrow_m');
+        if (!d.length) {
+            for (var i = 0; i < n; i++) {
+                var item = { "id": 0, "name": "new_" };             
+                dataView_m.addItem(item);
+            }
+        } else {
+            md = JSON.parse(d); 
+           // alert('sd: ' + JSON.stringify(md) + ', ' + md.length);
+            alert('sd: ' +  md.length);
+            for (var i = 0; i < md.length; i++) {
+                var item = {};
+                item["id"] = 0;
+                // skip id
+                for (var j = 1; j < columns_m.length; j++) {
+                    item[columns_m[j]["field"]] = md[i][columns_m[j]["field"]];
+                }
+              alert(JSON.stringify(item));
+                dataView_m.addItem(item);
+            }
         }
     }
 
-     });
+});
     <% end %>
 
 <% else %>

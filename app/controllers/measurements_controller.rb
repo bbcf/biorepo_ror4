@@ -122,27 +122,6 @@ class MeasurementsController < ApplicationController
     @measurement = Measurement.new
   end
 
-  def batch_new_deprecated
-    if params[:project_key]
-        @project = Project.find_by_key(params[:project_key])
-        @exp = Exp.find(params[:exp_id]) if params[:exp_id]
-        @sample = Sample.find(params[:sample_id]) if params[:sample_id]
-        logger.debug('BATCH_NEW = '+params.to_s)
-        number_new_measurements = params[:number_new_measurements]
-        for i in 1..number_new_measurements.to_i
-            name = @project.name + '_' + i.to_s
-            @measurement = Measurement.new(:name => name, :user_id => session[:user_id])
-            @measurement.save!
-            @sample.measurements << @measurement
-        end
-        h_res = {}
-        respond_to do |format|
-            format.html # index.html.erb
-            format.json { render json: h_res  }
-        end
-    end
-   end
-
   # POST
   def save_batch
     logger.debug('SAVE_MEASUREMENTS: ' + params.to_s)
@@ -233,21 +212,25 @@ class MeasurementsController < ApplicationController
               h_avn_condition = { :attr_id => a.id, :name => row[a.name]}
               @attr_value_new = AttrValue.joins(" join attrs on (attrs.id = attr_values.attr_id)").where(h_avn_condition).select("attrs.name as aname, attr_values.*").first # all
               # if not existing attr_value - save in DB
-              if !@attr_value_new # and !row[a.name].empty?
-                  logger.debug('ADD new av in DB')
-                  @attr_value_new = AttrValue.new(:name => row[a.name], :attr_id => a.id)
-                  @attr_value_new.save!
-              end
-              logger.debug('NEW avn: ' + @attr_value_new.name.to_s)
-              # if attr_value was not changed in SlickGrid do nothing
-              if @measurement.attr_values.include?(@attr_value_new)
-                  logger.debug('NOT changed for  sid = ' + row[:id].to_s + '; aname = '+ @attr_value_new.aname + '; avid = ' + @attr_value_new.id.to_s + '; avname = ' + @attr_value_new.name.to_s)
+              if !@attr_value_new and a.widget_id == 5
+
               else
+                if !@attr_value_new and a.widget_id !=5 # and !row[a.name].empty?
+                    logger.debug('ADD new av in DB')
+                    @attr_value_new = AttrValue.new(:name => row[a.name], :attr_id => a.id)
+                    @attr_value_new.save!
+                end
+                logger.debug('NEW avn: ' + @attr_value_new.name.to_s)
+                # if attr_value was not changed in SlickGrid do nothing
+                if @measurement.attr_values.include?(@attr_value_new)
+                    logger.debug('NOT changed for  sid = ' + row[:id].to_s + '; aname = '+ @attr_value_new.aname + '; avid = ' + @attr_value_new.id.to_s + '; avname = ' + @attr_value_new.name.to_s)
+                else
                   # delete old attr_value in DB
                   logger.debug('ADD and DELETE')
                   @measurement.attr_values.delete(@attr_value_old) if @attr_value_old
                   @measurement.attr_values << @attr_value_new
-              end
+                end
+            end
           end
         end
       end

@@ -2,6 +2,18 @@
 <span class='info'><%= @samples.size %> <%= (@samples.size > 1 ) ? 'have' : 'has' %> been found!</span>
 <div id='grid' style='height:300px'></div>
 <span id='save_samples' class='button'>Save Samples</span>
+<style>
+    .slick-cell-checkboxsel {
+      background: #f0f0f0;
+      border-right-color: silver;
+      border-right-style: solid;
+    }
+
+.slick-row.active .slick-cell {
+     background-color: #CCCCCC;
+}
+  </style>
+
 <%= javascript_tag do %>
     document.getElementById('save_samples').style.display = (current_sample_id == null) ? "none" : "table-cell";
 
@@ -22,7 +34,7 @@
     var grid;
     var columns = [
     {id: "id", name: "Id", field: "id", width: 20},
-    {id: "name", name: "Title", field: "name", editor: Slick.Editors.Text, width: 200, validator: requiredFieldValidator},
+    {id: "name", name: "Name", field: "name", editor: Slick.Editors.Text, width: 200, validator: requiredFieldValidator},
     //  {id: "created_at", name: "Created_at", field: "created_at"},
     {id: "date", name: "created at", field: "date"},
     {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text},
@@ -74,8 +86,19 @@
        // Need to use a DataView for the filter plugin
        var dataView = new Slick.Data.DataView();
        grid = new Slick.Grid("#grid", dataView, columns, options);
-       grid.setSelectionModel(new Slick.CellSelectionModel());
-        
+     grid.setSelectionModel(new Slick.CellSelectionModel());
+//       grid.setSelectionModel(new Slick.RowSelectionModel());
+/*
+// to make selection with checkbox
+var checkboxSelector = new Slick.CheckboxSelectColumn({
+    cssClass: "slick-cell-checkboxsel"
+});
+// add element to the beginning
+columns.unshift(checkboxSelector.getColumnDefinition());
+grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
+grid.registerPlugin(checkboxSelector);
+var columnpicker = new Slick.Controls.ColumnPicker(columns, grid, options);
+  */ 
        if (data[0]) {
            current_sample_id = data[0][grid.getColumns()[0].field];
        }
@@ -89,9 +112,9 @@
             var row = grid.getDataItem(args.row);
             old_sample_id = current_sample_id;
             current_sample_id = data[args.row][grid.getColumns()[0].field];
-
-//            alert('after click cur sample id = ' + current_sample_id); 
+            var cell = grid.getCellFromEvent(e);
             // even if current_sample_id == 0 update_measurement_list() to clear it
+            alert('cur s id = ' + current_sample_id);
             if (old_sample_id != current_sample_id && current_sample_id >= 0) {
                 update_measurement_list();
             }
