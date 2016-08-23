@@ -227,6 +227,34 @@ class SamplesController < ApplicationController
     end
   end
 
+  def delete_batch
+    logger.debug('DELETE_SAMPLES: ' + params.to_s)
+    samples_data = params[:_json]
+    res={:error => ''}
+    if !samples_data or !samples_data.size 
+        res[:error] = 'Select samples to delete.'
+    else
+        measurements_samples = Sample.joins("join measurements_samples on (sample_id = samples.id)").where({:id => samples_data}).select("measurements_samples.*").all
+        h = Hash[*measurements_samples.map {|ms| [ms.sample_id, ms.measurement_id]}.flatten]
+        samples_data.each do |id|
+           logger.debug('h: ' + h[id].to_s)
+           @sample = Sample.find(id) if id and id > 0
+           if @sample
+                if h[id]
+                    res[:error] += @sample.id.to_s
+                else
+                    logger.debug('FOUND SAMPLE: ' + @sample.id.to_s)
+                    @sample.destroy
+                end
+           end
+        end
+        res[:error] = 'Could not delete samples ' + res[:error] if res[:error]
+    end
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render :json => res  }
+    end
+  end
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_sample

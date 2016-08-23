@@ -2,6 +2,7 @@
 <span class='info'><%= @samples.size %> <%= (@samples.size > 1 ) ? 'have' : 'has' %> been found!</span>
 <div id='grid' style='height:300px'></div>
 <span id='save_samples' class='button'>Save Samples</span>
+ <span id='delete_samples' class='button'>Delete Samples</span>
 <style>
     .slick-cell-checkboxsel {
       background: #f0f0f0;
@@ -86,32 +87,32 @@
        // Need to use a DataView for the filter plugin
        var dataView = new Slick.Data.DataView();
        grid = new Slick.Grid("#grid", dataView, columns, options);
-     grid.setSelectionModel(new Slick.CellSelectionModel());
-//       grid.setSelectionModel(new Slick.RowSelectionModel());
-/*
-// to make selection with checkbox
-var checkboxSelector = new Slick.CheckboxSelectColumn({
-    cssClass: "slick-cell-checkboxsel"
-});
-// add element to the beginning
-columns.unshift(checkboxSelector.getColumnDefinition());
-grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
-grid.registerPlugin(checkboxSelector);
-var columnpicker = new Slick.Controls.ColumnPicker(columns, grid, options);
-  */ 
+//     grid.setSelectionModel(new Slick.CellSelectionModel());
+       grid.setSelectionModel(new Slick.RowSelectionModel());
+
+       // to make selection with checkbox
+       var checkboxSelector = new Slick.CheckboxSelectColumn({
+            cssClass: "slick-cell-checkboxsel"
+       });
+       // add element with checkbox to the beginning
+       columns.unshift(checkboxSelector.getColumnDefinition());
+       grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
+       grid.registerPlugin(checkboxSelector);
+       var columnpicker = new Slick.Controls.ColumnPicker(columns, grid, options);
+
        if (data[0]) {
-           current_sample_id = data[0][grid.getColumns()[0].field];
+           current_sample_id = data[0]['id'];
        }
        else { 
            current_sample_id = null;
        }
-//       alert('load sample list sample id = ' + current_sample_id); 
 
        // update SlickGrid for measurements on sample change
        grid.onClick.subscribe(function (e, args) {
             var row = grid.getDataItem(args.row);
             old_sample_id = current_sample_id;
-            current_sample_id = data[args.row][grid.getColumns()[0].field];
+//          current_sample_id = data[args.row][grid.getColumns()[0].field];
+            current_sample_id = data[args.row]['id'];
             var cell = grid.getCellFromEvent(e);
             // even if current_sample_id == 0 update_measurement_list() to clear it
             alert('cur s id = ' + current_sample_id);
@@ -233,9 +234,40 @@ var columnpicker = new Slick.Controls.ColumnPicker(columns, grid, options);
         });       
     }
 
+// button delete_samples        
+    $('#delete_samples').click(function(event){
+    var selectedRowsIds = dataView.mapRowsToIds(grid.getSelectedRows());
+    if (!selectedRowsIds.length) {
+        alert('Select samples to delete.');
+        return;
+    }
+    alert(selectedRowsIds[0] + ', ' + selectedRowsIds[1]);
+        if (confirm("Do you want to delete selected Samples?")) {
+            deleteSampleTable(selectedRowsIds);
+        }
+    });
+
+    function deleteSampleTable(ids) {
+        jQuery.ajax({
+            url: '<%= delete_batch_samples_path %>?project_key=<%= @project.key %>&exp_id=' + current_exp_id,
+            type: "POST",
+            dataType: 'json',
+            contentType: "application/json",
+            processData: false,
+            data: JSON.stringify(ids)
+        }).done(function(res) {
+            if (res['error']) {
+                alert(res['error']);
+            }
+            update_sample_list();
+        }).fail(function(error){
+                alert('Something has gone wrong: ' + error);
+                console.error("AJAX POST ERROR");
+                console.error(error);
+        });       
+    }
 
 // button defined in views/projects/_full_project
-
     $('#batch_new_samples_button').click(function(){
         n_new_samples = $('#number_new_batch_samples').val(),
         samples_data = $('#json_new_batch_samples').val()
