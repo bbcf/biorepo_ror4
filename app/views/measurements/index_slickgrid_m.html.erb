@@ -2,6 +2,7 @@
 <span class='info'><%= @measurements.size %> <%= (@measurements.size > 1 ) ? 'have' : 'has' %> been found!</span>
 <div id='MeasurementsGrid' style='height:200px'></div>
 <span id='save_measurements' class='button'>Save Measurements</span>
+<span id='delete_measurements' class='button'>Delete Measurements</span>
 <%= javascript_tag do %>
     document.getElementById('save_measurements').style.display = (current_measurement_id == null) ? "table-cell" : "none";
     document.getElementById('measurement_list').style.display = (current_sample_id > 0 ) ? "table-cell" : "none";
@@ -39,28 +40,28 @@
          var widget = columns_m[index]["widget"];
          
          switch(widget) {
-                case 1:
-                case 2:
-                    columns_m[index]["editor"] = Slick.Editors.Text;
-                    break;
-                case 3:
-                case 4:
-                    columns_m[index]["editor"] = Slick.Editors.Checkbox;
-                    columns_m[index]["formatter"] = Slick.Formatters.Checkmark;
-                    break;
-                case 5:
-                    columns_m[index]["editor"] = Slick.Editors.SelectCell;
-                    break;
-                case 6:
-                    columns_m[index]["editor"] = Slick.Editors.Integer;
-                    break;
-                case 7: // type year
-                    columns_m[index]["editor"] = Slick.Editors.Integer;
-                    columns_m[index]["validator"] = yearFieldValidator
-                    break;
-                default:
-                    columns_m[index]["editor"] = Slick.Editors.Text;
-            }
+             case 1:
+             case 2:
+                 columns_m[index]["editor"] = Slick.Editors.Text;
+                 break;
+             case 3:
+             case 4:
+                 columns_m[index]["editor"] = Slick.Editors.Checkbox;
+                 columns_m[index]["formatter"] = Slick.Formatters.Checkmark;
+                 break;
+             case 5:
+                 columns_m[index]["editor"] = Slick.Editors.SelectCell;
+                 break;
+             case 6:
+                 columns_m[index]["editor"] = Slick.Editors.Integer;
+                 break;
+             case 7: // type year
+                 columns_m[index]["editor"] = Slick.Editors.Integer;
+                 columns_m[index]["validator"] = yearFieldValidator
+                 break;
+             default:
+                 columns_m[index]["editor"] = Slick.Editors.Text;
+         }
      }
 
      var options_m = {
@@ -73,98 +74,116 @@
      };
 
     $(function () {
-            var data_m = <%= raw @SlickGridMeasurementData.to_json %>;
-            // Need to use a DataView for the filter plugin
-            var dataView_m = new Slick.Data.DataView();
-            grid_m = new Slick.Grid("#MeasurementsGrid", dataView_m, columns_m, options_m);
-            grid_m.setSelectionModel(new Slick.CellSelectionModel());
-//            alert(JSON.stringify(columns_m));
+      var data_m = <%= raw @SlickGridMeasurementData.to_json %>;
+      // Need to use a DataView for the filter plugin
+      var dataView_m = new Slick.Data.DataView();
+      grid_m = new Slick.Grid("#MeasurementsGrid", dataView_m, columns_m, options_m);
+//      grid_m.setSelectionModel(new Slick.CellSelectionModel());
+      grid_m.setSelectionModel(new Slick.RowSelectionModel());
 
-            if (data_m[0]) {
-                current_measurement_id = data_m[0][grid_m.getColumns()[0].field];
-            }
-            else {
-                current_measurement_id = null;
-            }
+       // to make selection with checkbox
+       var checkboxSelector = new Slick.CheckboxSelectColumn({
+            cssClass: "slick-cell-checkboxsel"
+       });
+       // add element with checkbox to the beginning
+       columns_m.unshift(checkboxSelector.getColumnDefinition());
+       grid_m.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
+       grid_m.registerPlugin(checkboxSelector);
+       var columnpicker = new Slick.Controls.ColumnPicker(columns_m, grid_m, options_m);
 
-            dataView_m.onRowCountChanged.subscribe(function (e, args) {
-                grid_m.updateRowCount();
-                grid_m.render();
-            });
+       if (data_m[0]) {
+           current_measurement_id = data_m[0]['id'];
+       }
+       else {
+           current_measurement_id = null;
+       }
 
-            dataView_m.onRowsChanged.subscribe(function (e, args) {
-                grid_m.invalidateRows(args.rows);
-                grid_m.render();
-            });
+       dataView_m.onRowCountChanged.subscribe(function (e, args) {
+           grid_m.updateRowCount();
+           grid_m.render();
+       });
 
-            dataView_m.beginUpdate();
-            dataView_m.setItems(data_m);
-            dataView_m.setFilter(filter);
-            dataView_m.endUpdate();
+       dataView_m.onRowsChanged.subscribe(function (e, args) {
+           grid_m.invalidateRows(args.rows);
+           grid_m.render();
+       });
 
-            var filterPlugin = new Ext.Plugins.HeaderFilter({});
+       dataView_m.beginUpdate();
+       dataView_m.setItems(data_m);
+       dataView_m.setFilter(filter);
+       dataView_m.endUpdate();
 
-            // This event is fired when a filter is selected
-            filterPlugin.onFilterApplied.subscribe(function () {
-                dataView_m.refresh();
-                grid_m.resetActiveCell();
+       var filterPlugin = new Ext.Plugins.HeaderFilter({});
 
-                // Excel like status bar at the bottom
-                var status;
+       // This event is fired when a filter is selected
+       filterPlugin.onFilterApplied.subscribe(function () {
+           dataView_m.refresh();
+           grid_m.resetActiveCell();
 
-                if (dataView_m.getLength() === dataView_m.getItems().length) {
-                    status = "";
-                } else {
-                    status = dataView_m.getLength() + ' OF ' + dataView_m.getItems().length + ' RECORDS FOUND';
-                }
-                $('#status-label').text(status);
-            });
+           // Excel like status bar at the bottom
+           var status;
 
-            // Event fired when a menu option is selected
-            filterPlugin.onCommand.subscribe(function (e, args) {
-                dataView_m.fastSort(args.column.field, args.command === "sort-asc");
-            });
+           if (dataView_m.getLength() === dataView_m.getItems().length) {
+               status = "";
+           } else {
+               status = dataView_m.getLength() + ' OF ' + dataView_m.getItems().length + ' RECORDS FOUND';
+           }
+           $('#status-label').text(status);
+       });
 
-            grid_m.registerPlugin(filterPlugin);
-            var overlayPlugin = new Ext.Plugins.Overlays({});
+       // Event fired when a menu option is selected
+       filterPlugin.onCommand.subscribe(function (e, args) {
+           dataView_m.fastSort(args.column.field, args.command === "sort-asc");
+       });
 
-            // Event fires when a range is selected
-            overlayPlugin.onFillUpDown.subscribe(function (e, args) {
-                var column = grid_m.getColumns()[args.range.fromCell];
+       grid_m.registerPlugin(filterPlugin);
+       var overlayPlugin = new Ext.Plugins.Overlays({});
 
-                // Ensure the column is editable
-                if (!column.editor) {
-                    return;
-                }
-                // Find the initial value
-                var value = dataView_m.getItem(args.range.fromRow)[column.field];
-                dataView_m.beginUpdate();
+       // Event fires when a range is selected
+       overlayPlugin.onFillUpDown.subscribe(function (e, args) {
+           var column = grid_m.getColumns()[args.range.fromCell];
 
-                // Copy the value down
-                for (var i = args.range.fromRow + 1; i <= args.range.toRow; i++) {
-                    dataView_m.getItem(i)[column.field] = value;
-                    grid_m.invalidateRow(i);
-                }
-                dataView_m.endUpdate();
-                grid_m.render();
-            });
+           // Ensure the column is editable
+           if (!column.editor) {
+               return;
+           }
+           // Find the initial value
+           var value = dataView_m.getItem(args.range.fromRow)[column.field];
+           dataView_m.beginUpdate();
 
-            grid_m.registerPlugin(overlayPlugin);
-            grid_m.init();
+           // Copy the value down
+           for (var i = args.range.fromRow + 1; i <= args.range.toRow; i++) {
+               dataView_m.getItem(i)[column.field] = value;
+               grid_m.invalidateRow(i);
+           }
+           dataView_m.endUpdate();
+           grid_m.render();
+       });
 
-            function filter(item) {
-                var columns = grid_m.getColumns();
-                var value = true;
-                for (var i = 0; i < columns.length; i++) {
-                    var col = columns[i];
-                    var filterValues = col.filterValues;
-                    if (filterValues && filterValues.length > 0) {
-                        value = value & _.contains(filterValues, item[col.field]);
-                    }
-                }
-                return value;
-            }
+       grid_m.registerPlugin(overlayPlugin);
+       grid_m.init();
+
+       function filter(item) {
+           var columns = grid_m.getColumns();
+           var value = true;
+           for (var i = 0; i < columns.length; i++) {
+               var col = columns[i];
+               var filterValues = col.filterValues;
+               if (filterValues && filterValues.length > 0) {
+                   value = value & _.contains(filterValues, item[col.field]);
+               }
+           }
+           return value;
+       }
         
+    $('#save_measurements').click(function(event){
+        alert(JSON.stringify(data_m));
+        if (confirm("Do you want to save changes in Measurements?")) {
+            saveMeasurementTable(data_m);
+        }
+        update_measurement_list();
+    });
+
     function saveMeasurementTable(measurementData) {
         jQuery.ajax({
                 url: '<%= save_batch_measurements_path %>?project_key=<%= @project.key %>&sample_id=' +current_sample_id+'&exp_id=' + current_exp_id,
@@ -183,14 +202,42 @@
         });       
     }
 
-    $('#save_measurements').click(function(event){
-        alert(JSON.stringify(data_m));
-        if (confirm("Do you want to save changes in Measurements?")) {
-            saveMeasurementTable(data_m);
-        }
-        update_measurement_list();
-    });
         
+    $('#delete_measurements').click(function(event){
+        var selectedRowsIds = dataView_m.mapRowsToIds(grid_m.getSelectedRows());
+        // check if there is at least one non-zero id
+        var index = selectedRowsIds.findIndex(function (val) {
+            return val > 0; 
+        });
+
+        if (!selectedRowsIds.length || index < 0) {
+            alert('Select saved measurements to delete.');
+            return;
+        }
+        if (confirm("Do you want to delete selected Measurements? All unsaved data will be removed")) {
+            deleteMeasurementTable(selectedRowsIds);
+        }
+    });
+
+    function deleteMeasurementTable(ids) {
+        jQuery.ajax({
+                url: '<%= delete_batch_measurements_path %>',
+                type: "POST",
+                dataType: 'json',
+                contentType: "application/json",
+                processData: false,
+                data: JSON.stringify(ids)
+            }).done(function(res) {
+                if (res['error']) {
+                    alert(res['error']);
+                }
+                update_measurement_list();
+            }).fail(function(error){
+                    alert('Something has gone wrong: ' + error);
+                    console.error("POST ERROR");
+                    console.error(error);
+        });       
+    }
 // button defined in views/projects/_full_project
 
     $('#batch_new_measurements_button').click(function(){
@@ -199,27 +246,31 @@
         measurements_data = $('#json_new_batch_measurements').val()
         addNewRow_m(n_new_measurements, measurements_data);
         document.getElementById('save_measurements').style.display = "table-cell";
+        event.stopPropagation();
      });
 
     function addNewRow_m(n, d){
-        alert('addnewrow_m');
         if (!d.length) {
             for (var i = 0; i < n; i++) {
                 var item = { "id": 0, "name": "new_" };             
                 dataView_m.addItem(item);
             }
         } else {
-            md = JSON.parse(d); 
-           // alert('sd: ' + JSON.stringify(md) + ', ' + md.length);
-            alert('sd: ' +  md.length);
+            try{
+                md = JSON.parse(d);
+            }catch(e){
+                alert(e); //error in the above string(in this case,yes)!
+                return;
+            }
             for (var i = 0; i < md.length; i++) {
                 var item = {};
                 item["id"] = 0;
-                // skip id
+                // skip checkbox column 
                 for (var j = 1; j < columns_m.length; j++) {
-                    item[columns_m[j]["field"]] = md[i][columns_m[j]["field"]];
+                    if (columns[j]["editor"]) {
+                        item[columns_m[j]["field"]] = md[i][columns_m[j]["field"]];
+                    }
                 }
-              alert(JSON.stringify(item));
                 dataView_m.addItem(item);
             }
         }

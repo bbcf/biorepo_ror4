@@ -87,8 +87,8 @@
        // Need to use a DataView for the filter plugin
        var dataView = new Slick.Data.DataView();
        grid = new Slick.Grid("#grid", dataView, columns, options);
-//     grid.setSelectionModel(new Slick.CellSelectionModel());
-       grid.setSelectionModel(new Slick.RowSelectionModel());
+     grid.setSelectionModel(new Slick.CellSelectionModel());
+//       grid.setSelectionModel(new Slick.RowSelectionModel());
 
        // to make selection with checkbox
        var checkboxSelector = new Slick.CheckboxSelectColumn({
@@ -96,12 +96,15 @@
        });
        // add element with checkbox to the beginning
        columns.unshift(checkboxSelector.getColumnDefinition());
-       grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
+//       grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
+       grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: true}));
        grid.registerPlugin(checkboxSelector);
        var columnpicker = new Slick.Controls.ColumnPicker(columns, grid, options);
 
        if (data[0]) {
            current_sample_id = data[0]['id'];
+//            grid.gotoCell(0, 2, false);
+//            grid.onClick.notify({row:0,cell:2}); 
        }
        else { 
            current_sample_id = null;
@@ -109,13 +112,13 @@
 
        // update SlickGrid for measurements on sample change
        grid.onClick.subscribe(function (e, args) {
-            var row = grid.getDataItem(args.row);
+            alert('onClick');
+//            var row = grid.getDataItem(args.row);
+//            var cell = grid.getCellFromEvent(e);
             old_sample_id = current_sample_id;
-//          current_sample_id = data[args.row][grid.getColumns()[0].field];
             current_sample_id = data[args.row]['id'];
-            var cell = grid.getCellFromEvent(e);
+//            $(cell.cellNode).addClass("active11");
             // even if current_sample_id == 0 update_measurement_list() to clear it
-            alert('cur s id = ' + current_sample_id);
             if (old_sample_id != current_sample_id && current_sample_id >= 0) {
                 update_measurement_list();
             }
@@ -236,13 +239,17 @@
 
 // button delete_samples        
     $('#delete_samples').click(function(event){
-    var selectedRowsIds = dataView.mapRowsToIds(grid.getSelectedRows());
-    if (!selectedRowsIds.length) {
-        alert('Select samples to delete.');
-        return;
-    }
-    alert(selectedRowsIds[0] + ', ' + selectedRowsIds[1]);
-        if (confirm("Do you want to delete selected Samples?")) {
+        var selectedRowsIds = dataView.mapRowsToIds(grid.getSelectedRows());i
+        // check if there is at least one non-zero id
+        var index = selectedRowsIds.findIndex(function (val) {
+            return val > 0; 
+        });
+
+        if (!selectedRowsIds.length || index < 0) {
+            alert('Select saved samples to delete.');
+            return;
+        }
+        if (confirm("Do you want to delete selected Samples? All unsaved data will be removed.")) {
             deleteSampleTable(selectedRowsIds);
         }
     });
@@ -273,6 +280,7 @@
         samples_data = $('#json_new_batch_samples').val()
         addNewRow(n_new_samples, samples_data);
         document.getElementById('save_samples').style.display =  "table-cell";
+        event.stopPropagation();
      });
 
     function addNewRow(n, d){
@@ -282,17 +290,24 @@
                 dataView.addItem(item);
             }
         } else {
-            sd = JSON.parse(d); 
+            try{
+                sd = JSON.parse(d);
+            }catch(e){
+                alert(e); //error in the above string(in this case,yes)!
+                return;
+            }
             for (var i = 0; i < sd.length; i++) {
-                var item = {};
-                item["id"] = 0;
-                // skip id
-                for (var j = 1; j < columns.length; j++) {
-                    item[columns[j]["field"]] = sd[i][columns[j]["field"]];
-                }
+                    var item = {};
+                    item["id"] = 0;
+                    // skip checkbox column 
+                    for (var j = 1; j < columns.length; j++) {
+                        if (columns[j]["editor"]) {
+                            item[columns[j]["field"]] = sd[i][columns[j]["field"]];
+                        }
+                    }
 //              alert(JSON.stringify(item);
                 dataView.addItem(item);
-            }
+                }
         }
     }
 });

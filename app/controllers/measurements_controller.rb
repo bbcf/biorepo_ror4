@@ -238,6 +238,38 @@ class MeasurementsController < ApplicationController
 
   # DELETE /measurements/1
   # DELETE /measurements/1.json
+  
+  def delete_batch
+    logger.debug('DELETE_MEASUREMENTS: ' + params.to_s)
+    m_data = params[:_json]
+    res={:error => ''}
+    error = false
+    if !m_data or !m_data.size 
+        res[:error] = 'Select measurements to delete.'
+    else
+        measurements_samples = Measurement.joins("join measurements_samples on (measurement_id = measurements.id)").where({:id => m_data}).select("measurements_samples.*").all
+        h = Hash[*measurements_samples.map {|ms| [ms.sample_id, ms.measurement_id]}.flatten]
+        m_data.each do |id|
+           logger.debug('h: ' + h[id].to_s + ', id: ' + id.to_s)
+           @measurement = Measurement.find(id) if id and id > 0
+           if @measurement
+                if h[id]
+                    res[:error] += id.to_s
+                    error = true
+                else
+                    @measurement.destroy
+                end
+           end
+        end
+        res[:error] = 'Could not delete measurements ' + res[:error] if error
+    end
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render :json => res  }
+    end
+
+  end
+
   def destroy
     @measurement.destroy
     respond_to do |format|

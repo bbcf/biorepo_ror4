@@ -231,6 +231,7 @@ class SamplesController < ApplicationController
     logger.debug('DELETE_SAMPLES: ' + params.to_s)
     samples_data = params[:_json]
     res={:error => ''}
+    error = false
     if !samples_data or !samples_data.size 
         res[:error] = 'Select samples to delete.'
     else
@@ -241,14 +242,14 @@ class SamplesController < ApplicationController
            @sample = Sample.find(id) if id and id > 0
            if @sample
                 if h[id]
-                    res[:error] += @sample.id.to_s
+                    res[:error] += id.to_s
+                    error = true
                 else
-                    logger.debug('FOUND SAMPLE: ' + @sample.id.to_s)
                     @sample.destroy
                 end
            end
         end
-        res[:error] = 'Could not delete samples ' + res[:error] if res[:error]
+        res[:error] = 'Could not delete samples ' + res[:error] if error
     end
     respond_to do |format|
       format.html # index.html.erb
