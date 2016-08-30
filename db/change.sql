@@ -325,7 +325,15 @@ update attr_values set name = 'Anti-RNA polymerase II Antibody, clone CTD4H8; 05
 
 
 alter table measurements add column fu_id integer;
-alter table measurements add foreign key (fu_id) references fus;
+alter table measurements add foreign key (fu_id) references fus on delete cascade;
 update measurements set fu_id = (select fu_id from fus_measurements where measurement_id = measurements.id);
 
-
+alter table fus drop column vitalit_path;
+alter table fus add column delayed_job_id integer references delayed_jobs (id);
+alter table fus add column status varchar(255);
+-- create delayed_job table
+-- rails generate delayed_job:active_record
+-- rake db:migrate
+-- add file config/initializers/delayed_job_config.rb
+-- add to file config/application.rb a line
+-- config.active_job.queue_adapter = :delayed_job

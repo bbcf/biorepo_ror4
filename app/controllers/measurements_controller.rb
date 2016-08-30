@@ -52,7 +52,8 @@ class MeasurementsController < ApplicationController
         exps = [@exp] if params[:exp_id] and exps.include?(@exp)
         
         h_condition = (params[:sample_id]) ? { :measurements_samples => {:sample_id =>params[:sample_id]}} :  {}
-        @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id)").where(h_condition).select("sample_id, measurements.*").all 
+        @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id) left join fus on fu_id = fus.id").where(h_condition).select("sample_id, fus.filename as filename, measurements.*").all 
+   #     @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id)").where(h_condition).select("sample_id, measurements.*").all 
  
         @SlickGridMeasurementData = [] 
         # get attributes for this exp_type and owner = 'measurement'
@@ -146,6 +147,11 @@ class MeasurementsController < ApplicationController
              @measurement = Measurement.new(:name => row[:name], :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
              @measurement.save!
              @sample.measurements << @measurement
+             file = Fu.new(:url_path => row[:filename])
+             if file.save
+                @measurement.update(:fu_id => file.id)
+                file.run_upload_job
+             end
         end
         update_attrs(row, exp_type_id)
         @measurement = nil
@@ -241,24 +247,28 @@ class MeasurementsController < ApplicationController
   
   def delete_batch
     logger.debug('DELETE_MEASUREMENTS: ' + params.to_s)
+    # list of ids to delete
     m_data = params[:_json]
     res={:error => ''}
     error = false
     if !m_data or !m_data.size 
         res[:error] = 'Select measurements to delete.'
     else
-        measurements_samples = Measurement.joins("join measurements_samples on (measurement_id = measurements.id)").where({:id => m_data}).select("measurements_samples.*").all
-        h = Hash[*measurements_samples.map {|ms| [ms.sample_id, ms.measurement_id]}.flatten]
+        fus_measurements = Measurement.joins("join fus on (fu_id = fus.id)").where({:id => m_data}).select("measurements.id as mid, fus.id as fid").all
+        h = Hash[*fus_measurements.map {|fm| [fm.mid, fm.fid]}.flatten]
         m_data.each do |id|
            logger.debug('h: ' + h[id].to_s + ', id: ' + id.to_s)
            @measurement = Measurement.find(id) if id and id > 0
            if @measurement
                 if h[id]
-                    res[:error] += id.to_s
-                    error = true
-                else
-                    @measurement.destroy
+                    fu = Fu.find(h[id])
+                    # !!!!!!!!!!!!!!!!!!!!!!!!
+                    # check if I really want to delete the file
+                    fu.destroy
+                    #res[:error] += id.to_s
+                    #error = true
                 end
+                @measurement.destroy
            end
         end
         res[:error] = 'Could not delete measurements ' + res[:error] if error

@@ -1,5 +1,9 @@
 class FusController < ApplicationController
-  before_action :set_fu, only: [:show, :edit, :update, :destroy]
+  before_action :set_fu, only: [:show, :edit, :update, :destroy, :upload]
+
+  def upload
+    # save file 
+  end
 
   # GET /fus
   # GET /fus.json
@@ -24,10 +28,11 @@ class FusController < ApplicationController
   # POST /fus
   # POST /fus.json
   def create
+    logger.debug('FU CREATE')
     @fu = Fu.new(fu_params)
-
     respond_to do |format|
       if @fu.save
+        @fu.run_upload_job
         format.html { redirect_to @fu, notice: 'Fu was successfully created.' }
         format.json { render :show, status: :created, location: @fu }
       else

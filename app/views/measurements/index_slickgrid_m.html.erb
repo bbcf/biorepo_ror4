@@ -27,9 +27,12 @@
         {id: "name", name: "Name", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
 //      {id: "created_at", name: "Created_at", field: "created_at"},
         {id: "date", name: "Created_at", field: "date"},
-        {id: "raw", name: "Raw", field: "raw", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
-        {id: "public", name: "Public", field: "public", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox},
-        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
+        {id: "raw", name: "Raw", field: "raw", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox, width: 10},
+        {id: "public", name: "Public", field: "public", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox, width: 10},
+        {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text},
+//        {id: "fu_id", name: "File", field: "fu_id"}
+//        {id: "filename", name: "filename", field: "filename", editor: Slick.Editors.Text}
+        {id: "filename", name: "filename", field: "filename"}
     ];
 
     // add editors to columns of attributes
@@ -240,13 +243,13 @@
     }
 // button defined in views/projects/_full_project
 
-    $('#batch_new_measurements_button').click(function(){
+    $('#batch_new_measurements_button').click(function(event){
         alert('batch new measurements');
         n_new_measurements = $('#number_new_batch_measurements').val(),
         measurements_data = $('#json_new_batch_measurements').val()
         addNewRow_m(n_new_measurements, measurements_data);
         document.getElementById('save_measurements').style.display = "table-cell";
-        event.stopPropagation();
+//        event.stopPropagation();
      });
 
     function addNewRow_m(n, d){
