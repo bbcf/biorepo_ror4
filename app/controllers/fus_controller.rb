@@ -1,8 +1,35 @@
+require 'fileutils'
 class FusController < ApplicationController
   before_action :set_fu, only: [:show, :edit, :update, :destroy, :upload]
 
-  def upload
-    # save file 
+  def upload url
+    # save file
+    lab = Lab.find(session[:lab_id])
+    folder = @measurement.raw ? "/raw" : "/processed"
+    lab_upload_dir = APP_CONFIG[:upload_dir] + '/' + lab.name
+    upload_dir = APP_CONFIG[:upload_dir] + '/' + lab.name + folder
+    logger.debug('UPLOAD: ' + upload_dir.to_s)
+    # upload file to tmp folder, copy to archive with sha2 name
+    # and delete from tmp folder
+    tmp_upload_dir = APP_CONFIG[:tmp_upload_dir] + '/' + lab.name
+    Dir.mkdir(tmp_upload_dir) if !Dir.exists?(tmp_upload_dir)
+
+    if !Dir.exists?(lab_upload_dir)
+      Dir.mkdir(lab_upload_dir) 
+      Dir.mkdir(lab_upload_dir + '/raw')
+      Dir.mkdir(lab_upload_dir + '/processed')
+    end
+    # filename is in the parameters
+    # original_filename = url.gsub('&', '_').gsub(':', '_').gsub('/', '_').gsub('?', '').gsub('\\', '')
+    tmp_upload_path = tmp_upload_dir + '/' + @fu.filename
+    download_cmd = "wget -O #{upload_path} '#{url}'"
+    `#{download_cmd}`
+
+    sha2 = Digest::SHA2.file(tmp_upload_path).hexdigest
+    FileUtils.move tmp_upload_path, (upload_dir + '/'+ sha2)
+    File.delete(tmp_upload_path)
+    @fu.update(:sha1 => sha2, :path => upload_dir)
+    # File.symlink (upload_dir + sha2), (file_path)
   end
 
   # GET /fus

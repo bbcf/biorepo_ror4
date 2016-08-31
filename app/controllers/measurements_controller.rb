@@ -147,10 +147,11 @@ class MeasurementsController < ApplicationController
              @measurement = Measurement.new(:name => row[:name], :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
              @measurement.save!
              @sample.measurements << @measurement
-             file = Fu.new(:url_path => row[:filename])
+             file = Fu.new(:filename => @measurement.name)
+             # file = Fu.new(:filename => @measurement.name, :url_path => row[:filename])
              if file.save
                 @measurement.update(:fu_id => file.id)
-                file.run_upload_job
+                file.run_upload_job row[:filename], session[:lab_id], @measurement.raw
              end
         end
         update_attrs(row, exp_type_id)

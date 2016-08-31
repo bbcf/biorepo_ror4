@@ -1,4 +1,4 @@
-  class SaveFileJob < Struct.new(:fu_id)
+  class SaveFileJob < Struct.new(:fu_id, :url, :lab_id, :raw)
 #    def enqueue(job)
 #      job.delayed_reference_id = fu_id
 #      job.delayed_reference_type = 'BiorepoiRor4::File' #??????
@@ -27,7 +27,8 @@
      # measurement = BiorepoRor4::Measurement.find measurement_id
      file = Fu.find fu_id
      update_status('uploading')
-     raise StandardError.new("Failed to save file #{file.name} for measurement with id: #{file.measurement.id} ") unless file.upload?
+     file.upload url, lab_id, raw
+#     raise StandardError.new("Failed to save file #{file.name} for measurement with id: #{file.measurement.id} ") unless file.upload(url)
     end
 
 
