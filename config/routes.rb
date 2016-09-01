@@ -47,6 +47,7 @@ Rails.application.routes.draw do
     collection do
       get :index_slickgrid_m
       post :delete_batch
+      post :download_batch
       post :save_batch
     end
   end

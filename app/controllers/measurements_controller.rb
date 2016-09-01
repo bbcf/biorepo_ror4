@@ -52,7 +52,7 @@ class MeasurementsController < ApplicationController
         exps = [@exp] if params[:exp_id] and exps.include?(@exp)
         
         h_condition = (params[:sample_id]) ? { :measurements_samples => {:sample_id =>params[:sample_id]}} :  {}
-        @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id) left join fus on fu_id = fus.id").where(h_condition).select("sample_id, fus.filename as filename, measurements.*").all 
+        @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id) left join fus on fu_id = fus.id").where(h_condition).select("sample_id, fus.filename as filename, fus.url_path as url_path, measurements.*").all 
    #     @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id)").where(h_condition).select("sample_id, measurements.*").all 
  
         @SlickGridMeasurementData = [] 
@@ -147,11 +147,12 @@ class MeasurementsController < ApplicationController
              @measurement = Measurement.new(:name => row[:name], :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
              @measurement.save!
              @sample.measurements << @measurement
-             file = Fu.new(:filename => @measurement.name)
+             new_file_name = row[:filename] ? row[:filename] : @measurement.name
+             file = Fu.new(:filename => new_file_name, :url_path => row[:url_path])
              # file = Fu.new(:filename => @measurement.name, :url_path => row[:filename])
              if file.save
                 @measurement.update(:fu_id => file.id)
-                file.run_upload_job row[:filename], session[:lab_id], @measurement.raw
+                file.run_upload_job row[:url_path], session[:lab_id], @measurement.raw
              end
         end
         update_attrs(row, exp_type_id)
@@ -278,7 +279,6 @@ class MeasurementsController < ApplicationController
       format.html # index.html.erb
       format.json { render :json => res  }
     end
-
   end
 
   def destroy
@@ -286,6 +286,35 @@ class MeasurementsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to measurements_url, notice: 'Measurement was successfully destroyed.' }
       format.json { head :no_content }
+    end
+  end
+
+  def download_batch
+    logger.debug('DOWNLOAD_MEASUREMENTS: ' + params.to_s)
+    # list of ids to delete
+    m_data = params[:_json]
+    res={:error => ''}
+    error = false
+    if !m_data or !m_data.size 
+        res[:error] = 'Select measurements to download.'
+    else
+        user = User.find(session[:user_id])
+        @sample = Sample.joins('join measurements_samples on measurements_samples.sample_id = samples.id').where(:measurements_samples => {:measurement_id => m_data}).select("samples.*").first
+       
+#        ms = Measurement.find(m_data)
+#        if (! ms.fus.count) 
+        fus = Measurement.joins("join fus on measurements.fu_id = fus.id").where({:id => m_data}).select("fus.*")
+        if (!fus.count)
+            error = true
+            res[:error] = 'Could not download files: no files for selected measurements '
+        else
+            h_files = Hash[*fus.map {|f| [f.id, f.filename]}.flatten]
+            user.run_download_job h_files, @sample.name, session[:lab_id] if user
+        end
+    end
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render :json => res  }
     end
   end
 

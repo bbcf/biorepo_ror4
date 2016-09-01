@@ -3,6 +3,7 @@
 <div id='MeasurementsGrid' style='height:200px'></div>
 <span id='save_measurements' class='button'>Save Measurements</span>
 <span id='delete_measurements' class='button'>Delete Measurements</span>
+<span id='download_measurements' class='button'>Download Measurements</span>
 <%= javascript_tag do %>
     document.getElementById('save_measurements').style.display = (current_measurement_id == null) ? "table-cell" : "none";
     document.getElementById('measurement_list').style.display = (current_sample_id > 0 ) ? "table-cell" : "none";
@@ -32,7 +33,9 @@
         {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text},
 //        {id: "fu_id", name: "File", field: "fu_id"}
 //        {id: "filename", name: "filename", field: "filename", editor: Slick.Editors.Text}
-        {id: "filename", name: "filename", field: "filename"}
+// can edit file name - it is only in database
+        {id: "filename", name: "filename", field: "filename", editor: Slick.Editors.Text},
+        {id: "url_path", name: "url_path", field: "url_path"}
     ];
 
     // add editors to columns of attributes
@@ -205,7 +208,7 @@
         });       
     }
 
-        
+// delete selected measurements        
     $('#delete_measurements').click(function(event){
         var selectedRowsIds = dataView_m.mapRowsToIds(grid_m.getSelectedRows());
         // check if there is at least one non-zero id
@@ -241,8 +244,45 @@
                     console.error(error);
         });       
     }
-// button defined in views/projects/_full_project
 
+// download selected measurements        
+    $('#download_measurements').click(function(event){
+        var selectedRowsIds = dataView_m.mapRowsToIds(grid_m.getSelectedRows());
+        // check if there is at least one non-zero id
+        var index = selectedRowsIds.findIndex(function (val) {
+            return val > 0; 
+        });
+
+        if (!selectedRowsIds.length || index < 0) {
+            alert('Select saved measurements to download.');
+            return;
+        }
+        if (confirm("Do you want to download selected Measurements?")) {
+            downloadMeasurementTable(selectedRowsIds);
+        }
+    });
+
+    function downloadMeasurementTable(ids) {
+        jQuery.ajax({
+                url: '<%= download_batch_measurements_path %>',
+                // POST because parameters can be long
+                type: "POST",
+                dataType: 'json',
+                contentType: "application/json",
+                processData: false,
+                data: JSON.stringify(ids)
+            }).done(function(res) {
+                if (res['error']) {
+                    alert(res['error']);
+                }
+            }).fail(function(error){
+                    alert('Something has gone wrong: ' + error);
+                    console.error("POST ERROR");
+                    console.error(error);
+        });       
+    }
+
+// button defined in views/projects/_full_project
     $('#batch_new_measurements_button').click(function(event){
         alert('batch new measurements');
         n_new_measurements = $('#number_new_batch_measurements').val(),

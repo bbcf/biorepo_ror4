@@ -40,4 +40,6 @@ def upload url, lab_id, raw
     self.update(:sha1 => sha2, :path => upload_dir)
     # File.symlink (upload_dir + sha2), (file_path)
   end
+
+
 end
