@@ -22,20 +22,35 @@
             return {valid: true, msg: null};
         }
     }
+    function linkFormatter(row, cell, value, columnDef, dataContext) {
+        if (value == null || value == undefined || !value.length) {
+            return '';
+        }
+        var tmp_data_m = <%= raw @SlickGridMeasurementData.to_json %>;
+        if (tmp_data_m.length <= row) {
+            return value;
+        } else {
+        filename = tmp_data_m[row]['filename'];
+        path = tmp_data_m[row]['path']
+        var link = '<%=APP_CONFIG[:biorepo_server] + APP_CONFIG[:data_dir] + APP_CONFIG[:upload_dir]%>' + '/' + path + '/' + value; 
+        return '<a href=' +link+ '>'+filename+ '</a>';
+        }
+    }
+
     var grid_m;
     var columns_m = [
         {id: "id", name: "Id", field: "id", width: 20 },
         {id: "name", name: "Name", field: "name", editor: Slick.Editors.Text, validator: requiredFieldValidator},
-//      {id: "created_at", name: "Created_at", field: "created_at"},
         {id: "date", name: "Created_at", field: "date"},
-        {id: "raw", name: "Raw", field: "raw", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox, width: 10},
-        {id: "public", name: "Public", field: "public", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox, width: 10},
+        {id: "raw", name: "Raw", field: "raw", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox, width: 5},
+        {id: "public", name: "Public", field: "public", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox, width: 5},
         {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text},
-//        {id: "fu_id", name: "File", field: "fu_id"}
-//        {id: "filename", name: "filename", field: "filename", editor: Slick.Editors.Text}
 // can edit file name - it is only in database
-        {id: "filename", name: "filename", field: "filename", editor: Slick.Editors.Text},
-        {id: "url_path", name: "url_path", field: "url_path"}
+//        {id: "filename", name: "filename", field: "filename", editor: Slick.Editors.Text, width: 30},
+        {id: "sha1", name: "filename", field: "sha1", editor: Slick.Editors.Text, width: 30, formatter: linkFormatter},
+        {id: "url_path", name: "url_path", field: "url_path"},
+        {id: "path", name: "path", field: "path", cssClass: "cell-title", formatter: linkFormatter },
+        {id: "status", name: "status", field: "status", width: 20} 
     ];
 
     // add editors to columns of attributes
@@ -310,8 +325,11 @@
                 item["id"] = 0;
                 // skip checkbox column 
                 for (var j = 1; j < columns_m.length; j++) {
+                    // if field is editable create a new line
                     if (columns[j]["editor"]) {
-                        item[columns_m[j]["field"]] = md[i][columns_m[j]["field"]];
+                       // item[columns_m[j]["field"]] = md[i][columns_m[j]["field"]];
+                        // use name for input user data
+                        item[columns_m[j]["field"]] = md[i][columns_m[j]["name"]];
                     }
                 }
                 dataView_m.addItem(item);

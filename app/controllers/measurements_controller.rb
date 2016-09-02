@@ -52,7 +52,7 @@ class MeasurementsController < ApplicationController
         exps = [@exp] if params[:exp_id] and exps.include?(@exp)
         
         h_condition = (params[:sample_id]) ? { :measurements_samples => {:sample_id =>params[:sample_id]}} :  {}
-        @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id) left join fus on fu_id = fus.id").where(h_condition).select("sample_id, fus.filename as filename, fus.url_path as url_path, measurements.*").all 
+        @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id) left join fus on fu_id = fus.id").where(h_condition).select("sample_id, fus.filename as filename, fus.url_path as url_path, fus.path as path, fus.status as status, fus,sha1 as sha1, measurements.*").all 
    #     @measurements = Measurement.joins("join measurements_samples on (measurements.id = measurement_id)").where(h_condition).select("sample_id, measurements.*").all 
  
         @SlickGridMeasurementData = [] 
