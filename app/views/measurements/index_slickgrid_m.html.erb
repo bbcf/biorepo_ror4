@@ -27,13 +27,17 @@
             return '';
         }
         var tmp_data_m = <%= raw @SlickGridMeasurementData.to_json %>;
+        // if this row is not saved just show filename, not link
         if (tmp_data_m.length <= row) {
             return value;
         } else {
-        filename = tmp_data_m[row]['filename'];
-        path = tmp_data_m[row]['path']
-        var link = '<%=APP_CONFIG[:biorepo_server] + APP_CONFIG[:data_dir] + APP_CONFIG[:upload_dir]%>' + '/' + path + '/' + value; 
-        return '<a href=' +link+ '>'+filename+ '</a>';
+            // if file is not saved show name, not link
+            if (tmp_data_m[row]['status'] != 'success') {return value;}
+            original_filename = tmp_data_m[row]['filename'];
+            filename = tmp_data_m[row]['sha1'];
+            path = tmp_data_m[row]['path']
+            var link = '<%=APP_CONFIG[:biorepo_server] + APP_CONFIG[:data_dir] + APP_CONFIG[:upload_dir]%>' + path + '/' + filename; 
+            return '<a href=' +link+ '>'+ original_filename + '</a>';
         }
     }
 
@@ -46,10 +50,10 @@
         {id: "public", name: "Public", field: "public", formatter: Slick.Formatters.Checkmark, editor: Slick.Editors.Checkbox, width: 5},
         {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text},
 // can edit file name - it is only in database
-//        {id: "filename", name: "filename", field: "filename", editor: Slick.Editors.Text, width: 30},
-        {id: "sha1", name: "filename", field: "sha1", editor: Slick.Editors.Text, width: 30, formatter: linkFormatter},
+        {id: "filename", name: "filename", field: "filename", editor: Slick.Editors.Text, width: 30, formatter: linkFormatter},
+        {id: "sha1", name: "sha1", field: "sha1", width: 30},
         {id: "url_path", name: "url_path", field: "url_path"},
-        {id: "path", name: "path", field: "path", cssClass: "cell-title", formatter: linkFormatter },
+//        {id: "path", name: "path", field: "path", cssClass: "cell-title", formatter: linkFormatter },
         {id: "status", name: "status", field: "status", width: 20} 
     ];
 
@@ -308,6 +312,9 @@
      });
 
     function addNewRow_m(n, d){
+        if (!dataView_m) {
+            dataView_m = new Slick.Data.DataView();
+        }
         if (!d.length) {
             for (var i = 0; i < n; i++) {
                 var item = { "id": 0, "name": "new_" };             
@@ -323,16 +330,15 @@
             for (var i = 0; i < md.length; i++) {
                 var item = {};
                 item["id"] = 0;
-                // skip checkbox column 
-                for (var j = 1; j < columns_m.length; j++) {
-                    // if field is editable create a new line
-                    if (columns[j]["editor"]) {
-                       // item[columns_m[j]["field"]] = md[i][columns_m[j]["field"]];
-                        // use name for input user data
-                        item[columns_m[j]["field"]] = md[i][columns_m[j]["name"]];
-                    }
+                // skip checkbox and id columns 
+                for (var j = 2; j < columns_m.length; j++) {
+                    alert( columns_m[j]["field"] + '=' + md[i][columns_m[j]["field"]])
+                    //only add values to fields which "field" and "name" are the same
+                    // use name for input user data
+                    item[columns_m[j]["field"]] = md[i][columns_m[j]["name"]];
                 }
                 dataView_m.addItem(item);
+                alert('after addItem');
             }
         }
     }

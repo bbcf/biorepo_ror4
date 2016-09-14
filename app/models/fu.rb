@@ -18,14 +18,13 @@ def upload url, lab_id, raw
     lab = Lab.find(lab_id)
     folder = raw ? "/raw" : "/processed"
     lab_upload_dir = APP_CONFIG[:data_path] + APP_CONFIG[:upload_dir] + '/' + lab.name
-    path = lab.name + folder
     full_upload_dir = lab_upload_dir + folder
     logger.debug('UPLOAD: ' + full_upload_dir.to_s)
     # upload file to tmp folder, copy to archive with sha2 name
     # and delete from tmp folder
     tmp_upload_dir = APP_CONFIG[:data_path] + APP_CONFIG[:tmp_upload_dir] + '/' + lab.name
     Dir.mkdir(tmp_upload_dir) if !Dir.exists?(tmp_upload_dir)
-
+    # create directory if it is not existing, e.g. for new labs
     if !Dir.exists?(lab_upload_dir)
       Dir.mkdir(lab_upload_dir)
       Dir.mkdir(lab_upload_dir + '/raw')
@@ -39,6 +38,7 @@ def upload url, lab_id, raw
 
     sha2 = Digest::SHA2.file(tmp_upload_path).hexdigest
     FileUtils.move tmp_upload_path, (full_upload_dir + '/'+ sha2)
+    path = '/' + lab.name + folder
     self.update(:sha1 => sha2, :path => path)
     # File.symlink (upload_dir + sha2), (file_path)
   end

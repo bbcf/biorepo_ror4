@@ -147,12 +147,15 @@ class MeasurementsController < ApplicationController
              @measurement = Measurement.new(:name => row[:name], :user_id => session[:user_id], :raw => row[:raw], :public => row[:public], :description => row[:description])
              @measurement.save!
              @sample.measurements << @measurement
-             new_file_name = row[:filename] ? row[:filename] : @measurement.name
-             file = Fu.new(:filename => new_file_name, :url_path => row[:url_path])
-             # file = Fu.new(:filename => @measurement.name, :url_path => row[:filename])
-             if file.save
-                @measurement.update(:fu_id => file.id)
-                file.run_upload_job row[:url_path], session[:lab_id], @measurement.raw
+             # save files only if url_path is present
+             if row[:url_path]
+                new_file_name = row[:filename] ? row[:filename] : @measurement.name
+                file = Fu.new(:filename => new_file_name, :url_path => row[:url_path])
+                # file = Fu.new(:filename => @measurement.name, :url_path => row[:filename])
+                if file.save
+                    @measurement.update(:fu_id => file.id)
+                    file.run_upload_job row[:url_path], session[:lab_id], @measurement.raw
+                end
              end
         end
         update_attrs(row, exp_type_id)
@@ -308,7 +311,10 @@ class MeasurementsController < ApplicationController
             error = true
             res[:error] = 'Could not download files: no files for selected measurements '
         else
-            h_files = Hash[*fus.map {|f| [f.id, f.filename]}.flatten]
+            # change this
+            # h_files = Hash[*fus.map {|f| [f.id, f.path + '/' + f.filename]}.flatten]
+            h_files = Hash[*fus.map {|f| [f.id, f.path + '/' + f.sha1]}.flatten]
+            # h_files = Hash[*fus.map {|f| [f.id, [f.path, f.filename] ]}.flatten]
             user.run_download_job h_files, @sample.name, session[:lab_id] if user
         end
     end
