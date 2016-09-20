@@ -337,3 +337,19 @@ alter table fus add column status varchar(255);
 -- add file config/initializers/delayed_job_config.rb
 -- add to file config/application.rb a line
 -- config.active_job.queue_adapter = :delayed_job
+
+create table downloads (
+    id serial not null primary key,
+    name varchar(255),
+    created_at timestamp not null,
+    delayed_job_id integer references delayed_jobs (id),
+    status varchar(255),
+    error varchar(255),
+    user_id integer not null,
+    lab_id integer not null
+);
+alter table downloads add foreign key (user_id) references users;
+alter table downloads add foreign key (lab_id) references labs;
+-- alter table downloads add foreign key (lab_id) references labs;
+
+-- rails generate scaffold Download

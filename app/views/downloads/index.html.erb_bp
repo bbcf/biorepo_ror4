@@ -1,0 +1,31 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Downloads</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @downloads.each do |download| %>
+      <tr class="<%= cycle('list_line_odd', 'list_line_even') %>">
+        <td>
+        <% link_dir = APP_CONFIG[:biorepo_server] + APP_CONFIG[:download] %>
+        <% file_link = result.path ? result.path + result.fname : '/'%>
+        <% link =  '//bioscript.epfl.ch' + file_link %>
+        <%= link_to download.name, link %>
+        </td> 
+        <td><%= link_to 'Show', download %></td>
+        <td><%= link_to 'Edit', edit_download_path(download) %></td>
+        <td><%= link_to 'Destroy', download, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Download', new_download_path %>

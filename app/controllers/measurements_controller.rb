@@ -297,25 +297,25 @@ class MeasurementsController < ApplicationController
     # list of ids to delete
     m_data = params[:_json]
     res={:error => ''}
-    error = false
     if !m_data or !m_data.size 
         res[:error] = 'Select measurements to download.'
     else
-        user = User.find(session[:user_id])
-        @sample = Sample.joins('join measurements_samples on measurements_samples.sample_id = samples.id').where(:measurements_samples => {:measurement_id => m_data}).select("samples.*").first
-       
-#        ms = Measurement.find(m_data)
-#        if (! ms.fus.count) 
         fus = Measurement.joins("join fus on measurements.fu_id = fus.id").where({:id => m_data}).select("fus.*")
         if (!fus.count)
-            error = true
             res[:error] = 'Could not download files: no files for selected measurements '
         else
-            # change this
-            # h_files = Hash[*fus.map {|f| [f.id, f.path + '/' + f.filename]}.flatten]
-            h_files = Hash[*fus.map {|f| [f.id, f.path + '/' + f.sha1]}.flatten]
-            # h_files = Hash[*fus.map {|f| [f.id, [f.path, f.filename] ]}.flatten]
-            user.run_download_job h_files, @sample.name, session[:lab_id] if user
+            time = Time.now
+            user = User.find(session[:user_id])
+            sample = Sample.joins('join measurements_samples on measurements_samples.sample_id = samples.id').where(:measurements_samples => {:measurement_id => m_data}).select("samples.*").first
+            date = time.strftime("%Y%m%d")
+            zipfile_name = date + '_' + user.name + '_' + sample.name + '.zip'
+            dl = Download.new(:name => zipfile_name, :user_id => session[:user_id], :lab_id => session[:lab_id])
+            if dl.save! 
+                # change this
+                # h_files = Hash[*fus.map {|f| [f.sha1, f.path + '/' + f.filename]}.flatten]
+                h_files = Hash[*fus.map {|f| [f.path + '/' + f.sha1, f.filename]}.flatten]
+                dl.run_download_job h_files, zipfile_name
+            end
         end
     end
     respond_to do |format|

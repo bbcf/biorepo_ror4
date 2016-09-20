@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
 
+  resources :downloads
   resources :exp_types
   resources :exps do
     collection do
