@@ -11,7 +11,7 @@
    </tr>
 </thead>
 <tbody>
-<% @downloads.each do |download| %>
+<% @user_downloads.each do |download| %>
     <% status = download.status %>
     <% color = 'green' %>
     <% color = 'red 'if status == 'failure' %>

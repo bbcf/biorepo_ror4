@@ -5,6 +5,11 @@ class DownloadsController < ApplicationController
   # GET /downloads.json
   def index
     @downloads = Download.all
+    if !@user or admin?
+        @user_downloads = Download.all
+    else
+        @user_downloads = Project.where(:user_id => @user.id).all
+    end
   end
 
   # GET /downloads/1
