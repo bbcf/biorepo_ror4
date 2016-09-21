@@ -1,6 +1,6 @@
 class Measurement < ActiveRecord::Base
 belongs_to :user
-has_and_belongs_to_many :fus
+belongs_to :fu
 has_and_belongs_to_many :attr_values
 has_and_belongs_to_many :attrs
 has_and_belongs_to_many :samples

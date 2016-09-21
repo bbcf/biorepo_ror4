@@ -262,16 +262,15 @@ class MeasurementsController < ApplicationController
         fus_measurements = Measurement.joins("join fus on (fu_id = fus.id)").where({:id => m_data}).select("measurements.id as mid, fus.id as fid").all
         h = Hash[*fus_measurements.map {|fm| [fm.mid, fm.fid]}.flatten]
         m_data.each do |id|
-           logger.debug('h: ' + h[id].to_s + ', id: ' + id.to_s)
            @measurement = Measurement.find(id) if id and id > 0
            if @measurement
                 if h[id]
                     fu = Fu.find(h[id])
+                    if fu.measurements.count == 1
                     # !!!!!!!!!!!!!!!!!!!!!!!!
                     # check if I really want to delete the file
-                    fu.destroy
-                    #res[:error] += id.to_s
-                    #error = true
+                        fu.destroy
+                    end
                 end
                 @measurement.destroy
            end

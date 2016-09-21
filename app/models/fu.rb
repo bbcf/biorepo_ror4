@@ -35,7 +35,13 @@ def upload url, lab_id
 
     FileUtils.move tmp_upload_path, (full_upload_dir + '/'+ sha2)
     path = '/' + folder
-    self.update(:sha1 => sha2, :path => path)
+    old_file = Fu.where(:sha1 => sha2).first
+    if old_file
+        self.measurements.first.update(:fu_id => old_file.id)
+        self.destroy
+    else
+        self.update(:sha1 => sha2, :path => path)
+    end
     # File.symlink (upload_dir + sha2), (file_path)
   end
 
