@@ -154,7 +154,7 @@ class MeasurementsController < ApplicationController
                 # file = Fu.new(:filename => @measurement.name, :url_path => row[:filename])
                 if file.save
                     @measurement.update(:fu_id => file.id)
-                    file.run_upload_job row[:url_path], session[:lab_id], @measurement.raw
+                    file.run_upload_job row[:url_path], session[:lab_id]
                 end
              end
         end
