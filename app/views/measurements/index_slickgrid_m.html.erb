@@ -6,6 +6,8 @@
 <span id='download_measurements' class='button'>Download Measurements</span>
 <%= javascript_tag do %>
     document.getElementById('save_measurements').style.display = (current_measurement_id == null) ? "table-cell" : "none";
+    document.getElementById('delete_measurements').style.display = (current_measurement_id == null) ? "table-cell" : "none";
+    document.getElementById('download_measurements').style.display = (current_measurement_id == null) ? "table-cell" : "none";
     document.getElementById('measurement_list').style.display = (current_sample_id > 0 ) ? "table-cell" : "none";
 
     function requiredFieldValidator(value) {

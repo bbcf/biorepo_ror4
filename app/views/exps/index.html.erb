@@ -11,16 +11,16 @@
 </thead>
 <tbody>
 <% @project.exps.each do |exp| %>
-<%= display_destroy = (@user.id == exp.user_id || admin?) ? 'block' : 'none'%>
+<% display_destroy = ((@user.id == exp.user_id) || admin?) ? 'block' : 'none'%>
     <tr class = 'erow' id = 'exp_<%=exp.id %>' >
         <td class='ecell' style='display: <%= display_id %>'><%= exp.id %></td>
         <td class='ecell'><%= exp.name %></td>
         <td class='ecell'><%= exp.exp_type.name %></td>
 
         <td class='ecell'><%#= link_to 'Show', exp %>
-        | <%= link_to 'Edit', edit_exp_path(exp) %>
-        |<td><span class='exp_destroy_link' id='exp_destroy_<%= exp.id %>'style='display: <%= display_destroy %>' >destroy</span></td>
-        | <%#= link_to 'Destroy', edit_project_path(@project.key), method: :delete, data: { confirm: 'Are you sure?' }, {:class => 'exp_destroy_link'} %>
+         <%= link_to 'Edit', edit_exp_path(exp) %>
+        <td><span class='exp_destroy_link' id='exp_destroy_<%= exp.id %>'style='display: <%= display_destroy %>' >destroy</span></td>
+         <%#= link_to 'Destroy', edit_project_path(@project.key), method: :delete, data: { confirm: 'Are you sure?' }, {:class => 'exp_destroy_link'} %>
          <%#= link_to 'Batch upload', batch_upload_form_exp_path(exp) %>
         </td>
 

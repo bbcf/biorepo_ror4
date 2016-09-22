@@ -113,6 +113,8 @@ function update_measurement_list(){
     // eval(responseText);
     //alert('update m_list: cur sample id = ' + current_sample_id + ', cur m id = ' + current_measurement_id);
     document.getElementById('save_measurements').style.display = (current_measurement_id == null) ? "none" : "table-cell";
+    document.getElementById('delete_measurements').style.display = (current_measurement_id == null) ? "none" : "table-cell";
+    document.getElementById('download_measurements').style.display = (current_measurement_id == null) ? "none" : "table-cell";
     document.getElementById('btn_m').style.display = (current_sample_id == null) ? "none" : "block";
     document.getElementById('measurement_list').style.display = (current_sample_id == null) ? "none" : "table-cell";
  }).fail(function(){

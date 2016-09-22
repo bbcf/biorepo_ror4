@@ -329,7 +329,7 @@ alter table measurements add foreign key (fu_id) references fus on delete cascad
 update measurements set fu_id = (select fu_id from fus_measurements where measurement_id = measurements.id);
 
 alter table fus drop column vitalit_path;
-alter table fus add column delayed_job_id integer references delayed_jobs (id);
+alter table fus add column delayed_job_id integer; -- references delayed_jobs (id);
 alter table fus add column status varchar(255);
 -- create delayed_job table
 -- rails generate delayed_job:active_record

@@ -96,13 +96,20 @@
        });
        // add element with checkbox to the beginning
        columns.unshift(checkboxSelector.getColumnDefinition());
-//       grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
-       grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: true}));
+       grid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
        grid.registerPlugin(checkboxSelector);
        var columnpicker = new Slick.Controls.ColumnPicker(columns, grid, options);
 
        if (data[0]) {
            current_sample_id = data[0]['id'];
+           // highlight first row
+           dataView.getItemMetadata = function (row) {
+                if (row == 0) {
+                    return {
+                        'cssClasses': 'active'
+                    };
+                }
+            };
 //            grid.gotoCell(0, 2, false);
 //            grid.onClick.notify({row:0,cell:2}); 
        }
@@ -112,12 +119,9 @@
 
        // update SlickGrid for measurements on sample change
        grid.onClick.subscribe(function (e, args) {
-            alert('onClick');
-//            var row = grid.getDataItem(args.row);
 //            var cell = grid.getCellFromEvent(e);
             old_sample_id = current_sample_id;
             current_sample_id = data[args.row]['id'];
-//            $(cell.cellNode).addClass("active11");
             // even if current_sample_id == 0 update_measurement_list() to clear it
             if (old_sample_id != current_sample_id && current_sample_id >= 0) {
                 update_measurement_list();
@@ -280,7 +284,7 @@
         samples_data = $('#json_new_batch_samples').val()
         addNewRow(n_new_samples, samples_data);
         document.getElementById('save_samples').style.display =  "table-cell";
-        event.stopPropagation();
+        //event.stopPropagation();
      });
 
     function addNewRow(n, d){

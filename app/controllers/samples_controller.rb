@@ -187,7 +187,8 @@ class SamplesController < ApplicationController
          h_avo_condition = {:attr_values_samples => {:sample_id => row[:id]}, :attr_id => a.id}
          @attr_value_old = AttrValue.joins("join attr_values_samples on (attr_values.id = attr_value_id) join attrs on (attrs.id = attr_values.attr_id)").where(h_avo_condition).select("attrs.name as aname, attr_values.*").first # all
          # if attr_value was deleted in SlickGrid
-         if row[a.name].empty?
+         logger.debug('UPDATE A: ' + row[a.name].to_s)
+         if row[a.name].blank?
              @sample.attr_values.delete(@attr_value_old) if @attr_value_old
          # there is a new attr_value in SlickGrid
          else
@@ -200,7 +201,7 @@ class SamplesController < ApplicationController
              else
              # if not existing attr_value - save in DB 
              # IF IT IS NOT A SELECT FIELD
-                if !@attr_value_new and a.widget_id != 5# and !row[a.name].empty?
+                if !@attr_value_new and a.widget_id != 5# and !row[a.name].blank?
                     @attr_value_new = AttrValue.new(:name => row[a.name], :attr_id => a.id)
                     @attr_value_new.save!
                 end
