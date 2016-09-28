@@ -305,19 +305,28 @@
 
 // button defined in views/projects/_full_project
     $('#batch_new_measurements_button').click(function(event){
-        alert('batch new measurements');
-        n_new_measurements = $('#number_new_batch_measurements').val(),
-        measurements_data = $('#json_new_batch_measurements').val()
+        var radio_m = document.getElementsByName("batch_new_m");
+        var measurements_data = '';
+        var n_new_measurements = 0;
+        if ($('#mnumber').is(':checked'))
+            n_new_measurements = $('#number_new_batch_measurements').val()
+        else if ($('#mtext').is(':checked')) {
+            measurements_data = $('#text_new_batch_measurements').val()
+        } else if ($('#mfile').is(':checked')) {
+            measurements_data = m_file_data;
+        } else {
+            alert('choose one option');
+        }
         addNewRow_m(n_new_measurements, measurements_data);
         document.getElementById('save_measurements').style.display = "table-cell";
-//        event.stopPropagation();
+        m_file_data = '';
      });
 
     function addNewRow_m(n, d){
         if (!dataView_m) {
             dataView_m = new Slick.Data.DataView();
         }
-        if (!d.length) {
+        if (!d || !d.length) {
             for (var i = 0; i < n; i++) {
                 var item = { "id": 0, "name": "new_" };             
                 dataView_m.addItem(item);

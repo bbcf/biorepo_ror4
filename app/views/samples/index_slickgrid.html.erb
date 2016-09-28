@@ -35,8 +35,7 @@
     var grid;
     var columns = [
     {id: "id", name: "Id", field: "id", width: 20},
-    {id: "name", name: "Name", field: "name", editor: Slick.Editors.Text, width: 200, validator: requiredFieldValidator},
-    //  {id: "created_at", name: "Created_at", field: "created_at"},
+    {id: "name", name: "name", field: "name", editor: Slick.Editors.Text, width: 200, validator: requiredFieldValidator},
     {id: "date", name: "created at", field: "date"},
     {id: "protocole", name: "Protocole", field: "protocole", editor: Slick.Editors.Text},
     {id: "description", name: "Description", field: "description", editor: Slick.Editors.Text}
@@ -279,18 +278,31 @@
     }
 
 // button defined in views/projects/_full_project
-    $('#batch_new_samples_button').click(function(){
-        n_new_samples = $('#number_new_batch_samples').val(),
-        samples_data = $('#json_new_batch_samples').val()
+    $('#batch_new_samples_button').click(function(event){
+        var radio_m = document.getElementsByName("batch_new_s");
+        var samples_data = '';
+        var n_new_samples = 0;
+        if ($('#snumber').is(':checked'))
+            n_new_samples = $('#number_new_batch_samples').val()
+        else if ($('#stext').is(':checked')) {
+            samples_data = $('#text_new_batch_samples').val()
+        } else if ($('#sfile').is(':checked')) {
+            samples_data = s_file_data;
+        } else {
+            alert('choose one option');
+        }
         addNewRow(n_new_samples, samples_data);
-        document.getElementById('save_samples').style.display =  "table-cell";
-        //event.stopPropagation();
+        document.getElementById('save_samples').style.display = "table-cell";
+        s_file_data = '';
      });
 
-    function addNewRow(n, d){
-        if (!d.length) {
+ function addNewRow(n, d){
+        if (!dataView) {
+            dataView = new Slick.Data.DataView();
+        }
+        if (!d || !d.length) {
             for (var i = 0; i < n; i++) {
-                var item = { "id": 0, "name": "new_" };             
+                var item = { "id": 0, "name": "new_" };
                 dataView.addItem(item);
             }
         } else {
@@ -301,17 +313,18 @@
                 return;
             }
             for (var i = 0; i < sd.length; i++) {
-                    var item = {};
-                    item["id"] = 0;
-                    // skip checkbox column 
-                    for (var j = 1; j < columns.length; j++) {
-                        if (columns[j]["editor"]) {
-                            item[columns[j]["field"]] = sd[i][columns[j]["field"]];
-                        }
-                    }
-//              alert(JSON.stringify(item);
-                dataView.addItem(item);
+                var item = {};
+                item["id"] = 0;
+                // skip checkbox and id columns
+                for (var j = 2; j < columns.length; j++) {
+                    //alert( columns[j]["field"] + '=' + sd[i][columns[j]["field"]])
+                    //alert( columns[j]["field"] + '=' + sd[i][columns[j]["name"]])
+                    //only add values to fields which "field" and "name" are the same
+                    // use name for input user data
+                    item[columns[j]["field"]] = sd[i][columns[j]["name"]];
                 }
+                dataView.addItem(item);
+            }
         }
     }
 });

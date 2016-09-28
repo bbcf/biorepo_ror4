@@ -33,13 +33,37 @@
 <%  s_visibility = (@project.exps.count > 0) ? true : false %>
 <div id="sample_list"></div>
 <div id='btn_s'>
-    Add <%= number_field_tag 'number_new_batch_samples', 3,  required: true, min: 1, max: 100 %> <%= text_area_tag 'json_new_batch_samples' %>new samples:
+    Add new samples:</br>
+    <input id ='snumber' type='radio' name='batch_new_s' ng-model='batch_new_s' value='number'> 
+    <label for='snumber'>Number</label>
+    <input id ='stext' type='radio' name='batch_new_s' ng-model='batch_new_s' value='text'> 
+    <label for='stext'>Text</label>
+    <input id ='sfile' type='radio' name='batch_new_s' ng-model='batch_new_s' value='file' checked='true'> 
+    <label for='sfile'>File</label>
+
+    <div id='input_s_fields'>
+        <%= number_field_tag 'number_new_batch_samples', 3,  required: true, min: 1, max: 100, disabled: false, style: 'display: none' %> 
+        <%= text_area_tag 'text_new_batch_samples', '', style: 'display: none' %>
+        <input type='file'  id='file_new_batch_samples' onchange="onChangeSamples(event)">
+    </div>
     <div id='batch_new_samples_button' class="button">Add samples</div>
 </div>
 
 <div id="measurement_list"></div>
 <div id='btn_m'>
-    Add<%= number_field_tag 'number_new_batch_measurements', 3,  required: true, min: 1, max: 100, disabled: false %> <%= text_area_tag 'json_new_batch_measurements' %> new measurements:
+    Add new measurements:</br>
+    <input id ='mnumber' type='radio' name='batch_new_m' ng-model='batch_new_m' value='number'> 
+    <label for='mnumber'>Number</label>
+    <input id ='mtext' type='radio' name='batch_new_m' ng-model='batch_new_m' value='text'> 
+    <label for='mtext'>Text</label>
+    <input id ='mfile' type='radio' name='batch_new_m' ng-model='batch_new_m' value='file' checked='true'> 
+    <label for='mfile'>File</label>
+
+    <div id='input_m_fields'>
+        <%= number_field_tag 'number_new_batch_measurements', 3,  required: true, min: 1, max: 100, disabled: false, style: 'display: none' %> 
+        <%= text_area_tag 'text_new_batch_measurements', '', style: 'display: none' %>
+        <input type='file'  id='file_new_batch_measurements' onchange="onChangeMeasurements(event)">
+    </div>
     <span id='batch_new_measurements_button' class="button" >Add measurements</span> 
 </div>
 <div class="actions">
@@ -49,6 +73,51 @@
 
 
 <%= javascript_tag do %>
+s_file_data = '';
+m_file_data = '';
+// read data from file on upload for samples
+function onChangeSamples(event) {
+  var fileInput = document.getElementById("file_new_batch_samples")
+  if (fileInput.value != '') {
+    var file = fileInput.files[0];
+    var textType = /text.*/;
+    if (file.type.match(textType)) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            s_file_data = reader.result;
+        }
+        reader.readAsText(file);
+    }
+  }  
+}
+
+// read data from file on upload for measurements
+function onChangeMeasurements(event) {
+  var fileInput = document.getElementById("file_new_batch_measurements")
+  if (fileInput.value != '') {
+    var file = fileInput.files[0];
+    var textType = /text.*/;
+    if (file.type.match(textType)) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            m_file_data = reader.result;
+        }
+        reader.readAsText(file);
+    }
+  }  
+}
+$('input[name="batch_new_s"]').on('change', function() {
+    $('#file_new_batch_samples').toggle(this.value === 'file');
+    $('#text_new_batch_samples').toggle(this.value === 'text');
+    $('#number_new_batch_samples').toggle(this.value === 'number');
+}).change();
+
+$('input[name="batch_new_m"]').on('change', function() {
+    $('#file_new_batch_measurements').toggle(this.value === 'file');
+    $('#text_new_batch_measurements').toggle(this.value === 'text');
+    $('#number_new_batch_measurements').toggle(this.value === 'number');
+}).change();
+
 var project_id = <%= @project.id %>
 var current_exp_id = <%= (@project.exps.count > 0) ? @project.exps.first.id : 'null' %> ;
 var current_sample_id = null;
